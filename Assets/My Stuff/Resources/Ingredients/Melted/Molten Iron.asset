@@ -12,3 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8bcc5077969d93b4aa580a4deb71521c, type: 3}
   m_Name: Molten Iron
   m_EditorClassIdentifier: 
+  meltingTemperature: 1000
+  liquidColor: {r: 0.87169814, g: 0.22480184, b: 0, a: 1}

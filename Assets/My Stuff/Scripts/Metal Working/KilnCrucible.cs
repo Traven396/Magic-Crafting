@@ -1,6 +1,8 @@
 using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
@@ -11,25 +13,31 @@ public class KilnCrucible : MonoBehaviour
     //Have it work like in Hydroneer, where once its inside the crucible it cant collide with any of the other things inside of it, to save on space.
     //They should still be grabbable so you can get them out afterwards if needed.
     [SerializeField] int CoolSpeed = 1;
-    [SerializeField] int CurrentHeat = 0;
+    [SerializeField] int _CurrentHeat = 0;
+    public int CurrentHeat { get { return _CurrentHeat; } }
+    [SerializeField] int MaxContainedLiquid = 250;
     [SerializeField] Transform ColliderParent;
 
     bool isHeating;
 
     List<IngredientInstance> currentInsertedMeltables = new();
+    [SerializeField] List<ContainedLiquidMetal> currentContainedLiquidMetal = new();
 
     Collider[] childColliders;
+    SkinnedMeshRenderer selfRenderer;
 
     private void Awake()
     {
         childColliders = ColliderParent.GetComponentsInChildren<Collider>();
+        selfRenderer = GetComponent<SkinnedMeshRenderer>();
+        
     }
 
     private void FixedUpdate()
     {
         if (!isHeating)
         {
-            if(CurrentHeat > 0)
+            if(_CurrentHeat > 0)
                 DecreaseHeat();
         }
     }
@@ -41,12 +49,54 @@ public class KilnCrucible : MonoBehaviour
 
     public void IncreaseHeat(int heatAmount)
     {
-        CurrentHeat += heatAmount;
+        _CurrentHeat += heatAmount;
         isHeating = true;
+
+        List<IngredientInstance> onesToRemove = new();
+        currentInsertedMeltables.ForEach(m =>
+        {
+            if (m.Item.MeltedIngredient.MeltingTemperature <= _CurrentHeat)
+            {
+                int currentFill = currentContainedLiquidMetal.Sum(liquid => liquid.amount);
+
+                ContainedLiquidMetal addedMetal = new ContainedLiquidMetal();
+                addedMetal.meltableIngredient = m.Item.MeltedIngredient;
+                addedMetal.amount = Mathf.Clamp(m.Item.MeltedAmount, 0, MaxContainedLiquid - currentFill);
+
+                if (addedMetal.amount != 0)
+                {
+                    var sameLiquid = currentContainedLiquidMetal.Where(lm => lm.meltableIngredient == m.Item.MeltedIngredient).ToList();
+
+                    if (sameLiquid.Any())
+                    {
+                        addedMetal.amount += sameLiquid[0].amount;
+
+                        currentContainedLiquidMetal[currentContainedLiquidMetal.IndexOf(sameLiquid[0])] = addedMetal;
+
+                        Debug.Log("Added to an already existing metal named: " + addedMetal.meltableIngredient.name + " for a total of: " + addedMetal.amount);
+                    }
+                    else
+                    {
+                        Debug.Log("We added a new metal named: " + addedMetal.meltableIngredient.name + " at an amount of: " + addedMetal.amount);
+                        currentContainedLiquidMetal.Add(addedMetal);
+                    }
+                }
+                else
+                {
+                    Debug.Log("we melted an ingredient but the crucible was already full so it's contents were wasted. Uh oh");
+                }
+
+                onesToRemove.Add(m);
+                Destroy(m.gameObject);
+                
+            }
+        });
+
+        currentInsertedMeltables = currentInsertedMeltables.Except(onesToRemove).ToList();
     }
     public void DecreaseHeat()
     {
-        CurrentHeat -= CoolSpeed;
+        _CurrentHeat -= CoolSpeed;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -106,5 +156,10 @@ public class KilnCrucible : MonoBehaviour
         currentInsertedMeltables.Remove(instance);
     }
 
-    
+    [Serializable]
+    struct ContainedLiquidMetal
+    {
+        public MeltableIngredientSO meltableIngredient;
+        public int amount;
+    }
 }
