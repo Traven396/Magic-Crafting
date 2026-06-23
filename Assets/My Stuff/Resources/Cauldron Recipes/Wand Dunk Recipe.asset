@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4078b93484c17724fa18aa420fa775f4, type: 3}
+  m_Name: Wand Dunk Recipe
+  m_EditorClassIdentifier: 
+  InitialIngredients:
+  - {fileID: 11400000, guid: b263aa9d8c5de854192b081f4b1a06a6, type: 2}
+  InitialStepEffects:
+    ShallowWaterColor: {r: 0.7735849, g: 0.41333017, b: 0.13866135, a: 0.39215687}
+    DeepWaterColor: {r: 0.7735849, g: 0.056131475, b: 0, a: 0.6313726}
+    Depth: -0.2
+    DepthStrength: 1.5
+    NoiseColor: {r: 0.8113208, g: 0.756574, b: 0.23727295, a: 0.5921569}
+    NoiseDensity: 5.5
+    NoiseSpeed: 0.03
+    NoiseDistance: 0.8
+    Edge1: -0.3
+    Edge2: 0.6
+    BubbleColor: {r: 0.96981126, g: 0.68591815, b: 0.012808777, a: 1}
+  Steps: []
+  MaxDunks: 3
+  DunkConversions:
+  - Input: {fileID: 11400000, guid: 53d6d6b449e5bb740953d68b39fcdada, type: 2}
+    Output: {fileID: 5826519192202194102, guid: 4d2ee43f040b7214ca5769613d19d987,
+      type: 3}
+  MaxBottled: 10
+  references:
+    version: 2
+    RefIds: []
