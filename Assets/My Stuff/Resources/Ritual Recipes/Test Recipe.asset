@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 525cd0a88e1ef2f40bfa078b04190c53, type: 3}
+  m_Name: Test Recipe
+  m_EditorClassIdentifier: 
+  Result: {fileID: 6524663615895045508, guid: a46b62ce201b4e04a9f61c8cf73b1558, type: 3}
+  PossiblePatterns: []
+  CentralIngredient: {fileID: 3259243335323233360, guid: f7cd4844dd40c05439444f985ebd7885,
+    type: 3}
+  RequiredCenter: {fileID: 5346768640502740878, guid: f509d0cae4a00e7469abc87fa3d773bb,
+    type: 3}
+  RequiredMiddle: {fileID: 7244848054924725238, guid: 30f0bd8f994e7e54495efc01bd159b30,
+    type: 3}
+  RequiredOuter: {fileID: 6810334091038043261, guid: 4b5ba2698901fbc468c5f9a991030d00,
+    type: 3}
+  AdditionalConditions:
+  - rid: 1400227164062744817
+  references:
+    version: 2
+    RefIds:
+    - rid: 1400227164062744817
+      type: {class: RitualTagCondition, ns: , asm: Assembly-CSharp}
+      data:
+        Aspects:
+        - WantedTag: {fileID: 11400000, guid: a377714131ece2d489203ffcff75ea26, type: 2}
+          Comparison: 0
+          Amount: 1
+        - WantedTag: {fileID: 11400000, guid: 53eff977b8235914daa9be0cf70d5b9c, type: 2}
+          Comparison: 0
+          Amount: 1
+        - WantedTag: {fileID: 11400000, guid: 5b79af26efc04224eaf458ea1a5aac10, type: 2}
+          Comparison: 0
+          Amount: 1

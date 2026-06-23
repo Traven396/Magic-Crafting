@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4078b93484c17724fa18aa420fa775f4, type: 3}
+  m_Name: Testing Cauldron Recipe
+  m_EditorClassIdentifier: 
+  InitialIngredients:
+  - {fileID: 11400000, guid: b263aa9d8c5de854192b081f4b1a06a6, type: 2}
+  - {fileID: 11400000, guid: fa220dc5681b348468f983cef4a7f24e, type: 2}
+  InitialStepEffects:
+    ShallowWaterColor: {r: 0, g: 0, b: 0, a: 0}
+    DeepWaterColor: {r: 0, g: 0, b: 0, a: 0}
+    Depth: 0
+    DepthStrength: 0
+    NoiseColor: {r: 0, g: 0, b: 0, a: 0}
+    NoiseDensity: 0
+    NoiseSpeed: 0
+    NoiseDistance: 0
+    BubbleColor: {r: 0, g: 0, b: 0, a: 0}
+  Steps:
+  - rid: 1400227498316529729
+  - rid: 1400227522879684672
+  MaxDunks: 1
+  DunkConversions: []
+  MaxBottled: 10
+  references:
+    version: 2
+    RefIds:
+    - rid: 1400227498316529729
+      type: {class: CauldronRecipeIngredientStep, ns: , asm: Assembly-CSharp}
+      data:
+        RequiredIngredients:
+        - {fileID: 11400000, guid: ee571d9fb0ba8bc45b5a1526d9b44a61, type: 2}
+        RequiredStir: 1
+        CompletedStepEffects:
+          ShallowWaterColor: {r: 0, g: 0, b: 0, a: 0}
+          DeepWaterColor: {r: 0, g: 0, b: 0, a: 0}
+          Depth: 0
+          DepthStrength: 0
+          NoiseColor: {r: 0, g: 0, b: 0, a: 0}
+          NoiseDensity: 0
+          NoiseSpeed: 0
+          NoiseDistance: 0
+          BubbleColor: {r: 0, g: 0, b: 0, a: 0}
+    - rid: 1400227522879684672
+      type: {class: CauldronRecipeIngredientStep, ns: , asm: Assembly-CSharp}
+      data:
+        RequiredIngredients:
+        - {fileID: 11400000, guid: 1b008931199304149ac57848eabc94fd, type: 2}
+        RequiredStir: 0
+        CompletedStepEffects:
+          ShallowWaterColor: {r: 0, g: 0, b: 0, a: 0}
+          DeepWaterColor: {r: 0, g: 0, b: 0, a: 0}
+          Depth: 0
+          DepthStrength: 0
+          NoiseColor: {r: 0, g: 0, b: 0, a: 0}
+          NoiseDensity: 0
+          NoiseSpeed: 0
+          NoiseDistance: 0
+          BubbleColor: {r: 0, g: 0, b: 0, a: 0}
