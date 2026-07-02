@@ -3,57 +3,39 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine;
 using Alchemy.Inspector;
+using DG.Tweening;
 
 public class TestingNestedConditions : MonoBehaviour
 {
-    [SerializeReference]
-    public List<ILogic> subTesterClasses = new List<ILogic>();
-}
 
+    Tween myTween;
 
-public interface ILogic
-{
-    public bool Evaluate(SubTesterClass testableClass);
-}
+    float timer = 5;
 
-[System.Serializable]
-public class LogicIDTest : ILogic
-{
-    [SerializeField]
-    private int requiredID;
-    public bool Evaluate(SubTesterClass testableClass)
+    private void Start()
     {
-        return testableClass.requireID == requiredID;
+        myTween = transform.DOMove(Vector3.zero, 2).OnComplete(TestingCompleteMethod);
+        myTween.SetAutoKill(false);
     }
-}
-[System.Serializable]
-public class LogicTagTest : ILogic
-{
-    [SerializeField]
-    private string requiredTag;
-    public bool Evaluate(SubTesterClass testableClass)
+
+    private void Update()
     {
-        return testableClass.pieceRequire.CompareTag(requiredTag);
+        if(timer != 69)
+        {
+            timer -= Time.deltaTime;
+            Debug.Log(timer);
+        }
+
+        if (timer <= 0)
+        {
+            myTween.Rewind(true);
+            timer = 69;
+            Debug.Log("Rewind");
+        }
     }
-}
+    void TestingCompleteMethod()
+    {
+        Debug.Log("The tween was completed");
+    }
 
-
-
-
-
-
-[System.Serializable]
-public class SubTesterClass
-{
-    public enum RequirementType { Type1, Type2, Type3 }
-
-    public RequirementType Type;
-    public int requireID;
-    public RitualPlatePiece pieceRequire;
-}
-
-
-public class  SubSubTesterClass : SubTesterClass
-{
-    public int requireID;
 }

@@ -58,10 +58,10 @@ Material:
     - _Edge2: 0.6
     - _Fade_Threshold: 0.2
     - _Max_Rotation_Speed: -2
-    - _NoiseDensity: 6
+    - _NoiseDensity: 5
     - _NoiseDistance: 0.6
     - _NoiseOffset: 5
-    - _NoiseSpeed: 0.1
+    - _NoiseSpeed: 0.01
     - _PixelSize: 32
     - _QueueControl: 0
     - _QueueOffset: 0
@@ -72,9 +72,9 @@ Material:
     - _Swirl_Thickness: 0.41
     m_Colors:
     - _Background_Color: {r: 0.7584905, g: 0.6857277, b: 0.29051608, a: 0}
-    - _DeepWaterColor: {r: 1, g: 0.5502357, b: 0, a: 1}
-    - _NoiseColor: {r: 0.95471686, g: 0.8767227, b: 0.13510129, a: 1}
-    - _ShallowWaterColor: {r: 1, g: 0.9509151, b: 0.20188677, a: 1}
+    - _DeepWaterColor: {r: 1, g: 0.8386055, b: 0.33018857, a: 1}
+    - _NoiseColor: {r: 1, g: 0.97753, b: 0.7528302, a: 1}
+    - _ShallowWaterColor: {r: 1, g: 0.9362745, b: 0, a: 1}
     - _Spiral_Color: {r: 1, g: 1, b: 1, a: 1}
     - _Water_Color_1: {r: 0.43137258, g: 0.5358289, b: 0.9098039, a: 0.8705882}
     - _Water_Color_2: {r: 0.2, g: 0.9625639, b: 1, a: 1}
