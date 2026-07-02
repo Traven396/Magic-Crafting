@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Xml.Serialization;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
@@ -40,7 +41,21 @@ public class KilnCrucible : MonoBehaviour
             if(_CurrentHeat > 0)
                 DecreaseHeat();
         }
+
+        AttemptPour();
     }
+
+    void AttemptPour()
+    {
+        //We need to check the angle that the crucible is currently at
+        //Baseline angle at 100% full is 40 degrees, and at 0% full is 100.
+        //The angle we are checking against will be based on the amount of liquid in the crucible as well.
+        //Angles of rotation would be checked on every axis except for Y axis
+
+
+    }
+
+
 
     public void BeginCooling()
     {
@@ -73,17 +88,17 @@ public class KilnCrucible : MonoBehaviour
 
                         currentContainedLiquidMetal[currentContainedLiquidMetal.IndexOf(sameLiquid[0])] = addedMetal;
 
-                        Debug.Log("Added to an already existing metal named: " + addedMetal.meltableIngredient.name + " for a total of: " + addedMetal.amount);
+                        //Debug.Log("Added to an already existing metal named: " + addedMetal.meltableIngredient.name + " for a total of: " + addedMetal.amount);
                     }
                     else
                     {
-                        Debug.Log("We added a new metal named: " + addedMetal.meltableIngredient.name + " at an amount of: " + addedMetal.amount);
+                        //Debug.Log("We added a new metal named: " + addedMetal.meltableIngredient.name + " at an amount of: " + addedMetal.amount);
                         currentContainedLiquidMetal.Add(addedMetal);
                     }
                 }
                 else
                 {
-                    Debug.Log("we melted an ingredient but the crucible was already full so it's contents were wasted. Uh oh");
+                    //Debug.Log("we melted an ingredient but the crucible was already full so it's contents were wasted. Uh oh");
                 }
 
                 onesToRemove.Add(m);
@@ -93,6 +108,13 @@ public class KilnCrucible : MonoBehaviour
         });
 
         currentInsertedMeltables = currentInsertedMeltables.Except(onesToRemove).ToList();
+
+        //We calculate how close to the full value we are
+        //Invert it using 1 - that value
+        //Multiply that value by 100 to get a percentage
+        //Clamp it between 0 and 100 just in case
+        //Then set the blendshape weight to that value so it visually represents how full the crucible is
+        selfRenderer.SetBlendShapeWeight(0, Mathf.Clamp((1 - ((float)currentContainedLiquidMetal.Sum(lm => lm.amount) / (float)MaxContainedLiquid)) * 100f - 15, 0f, 100f));
     }
     public void DecreaseHeat()
     {

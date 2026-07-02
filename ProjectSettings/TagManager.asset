@@ -10,6 +10,7 @@ TagManager:
   - Outer
   - Middle
   - PlayerFinger
+  - TongInteractor
   layers:
   - Default
   - TransparentFX

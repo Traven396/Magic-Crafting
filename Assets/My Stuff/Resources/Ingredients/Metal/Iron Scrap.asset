@@ -18,4 +18,5 @@ MonoBehaviour:
   _AspectTags: []
   Description: 
   _MeltedIngredient: {fileID: 11400000, guid: 9abca8d3b67afac41b6760c23c7d19a9, type: 2}
-  _MeltedAmount: 10
+  _MeltedAmount: 50
+  _IsAlchemyIngredient: 0
