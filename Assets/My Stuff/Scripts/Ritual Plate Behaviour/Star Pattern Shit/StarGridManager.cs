@@ -162,6 +162,8 @@ public class StarGridManager : MonoBehaviour
             validCheckTimer -= Time.deltaTime;
         else if (validCheckTimer != -69)
         {
+
+            validCheckTimer = -69;
             var validPattern = IsPatternValid();
 
             if (validPattern)
@@ -174,7 +176,6 @@ public class StarGridManager : MonoBehaviour
                 Debug.Log("Pattern is not valid");
             }
 
-            validCheckTimer = -69;
         }
     }
 

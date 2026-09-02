@@ -14,7 +14,7 @@ public class KilnBrain : MonoBehaviour, ITriggerable
 
 
 
-    List<KilnCrucible> currentInsertedCrucibles = new();
+    List<TemperatureController> currentHeatedObjects = new();
 
     float doorMoveTimer;
 
@@ -56,11 +56,12 @@ public class KilnBrain : MonoBehaviour, ITriggerable
     {
         if (DoorJoints.All(joint => Mathf.Abs(joint.angle) < 4))
         {
-            foreach (var crucible in currentInsertedCrucibles)
+            foreach (var heatedObject in currentHeatedObjects)
             {
-                if (crucible.CurrentHeat < MaxHeat)
+                if (heatedObject.TemperatureInt < MaxHeat)
                 {
-                    crucible.IncreaseHeat(HeatingSpeed); 
+                    heatedObject.PausePassiveCooling = true;
+                    heatedObject.RaiseTemperature(HeatingSpeed);
                 }
             }   
         }
@@ -92,29 +93,22 @@ public class KilnBrain : MonoBehaviour, ITriggerable
 
     public void OnTriggerEnterCall(Collider other)
     {
-        KilnCrucible crucible = other.GetComponentInParent<KilnCrucible>();
+        TemperatureController heatedObject = other.GetComponentInParent<TemperatureController>();
         
-        if (crucible)
+        if (heatedObject && !currentHeatedObjects.Contains(heatedObject))
         {
-            if (!currentInsertedCrucibles.Contains(crucible))
-            {
-                currentInsertedCrucibles.Add(crucible);
-            }
+            currentHeatedObjects.Add(heatedObject);
         }
     }
 
     public void OnTriggerExitCall(Collider other)
     {
-        KilnCrucible crucible = other.GetComponentInParent<KilnCrucible>();
+        TemperatureController heatedObject = other.GetComponentInParent<TemperatureController>();
 
-        if (crucible)
+        if (heatedObject && currentHeatedObjects.Contains(heatedObject))
         {
-            if(currentInsertedCrucibles.Contains(crucible))
-            {
-                currentInsertedCrucibles.Remove(crucible);
-                
-                crucible.BeginCooling();
-            }
+            currentHeatedObjects.Remove(heatedObject);
+            heatedObject.ResumePassiveCooling();
         }
     }
 

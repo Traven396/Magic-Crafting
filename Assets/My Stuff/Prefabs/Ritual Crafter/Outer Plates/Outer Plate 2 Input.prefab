@@ -97,12 +97,12 @@ PrefabInstance:
     - target: {fileID: 1226044711987029874, guid: 18d1d6937b2cf9d419d0706c86239ab6,
         type: 3}
       propertyPath: m_Name
-      value: Outer Plate 2 Piece
+      value: Outer Plate 2 Input
       objectReference: {fileID: 0}
     - target: {fileID: 1789127352392005283, guid: 18d1d6937b2cf9d419d0706c86239ab6,
         type: 3}
       propertyPath: PieceID
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1789127352392005283, guid: 18d1d6937b2cf9d419d0706c86239ab6,
         type: 3}

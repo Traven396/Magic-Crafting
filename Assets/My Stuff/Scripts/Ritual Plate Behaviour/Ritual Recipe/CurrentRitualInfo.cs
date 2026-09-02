@@ -13,6 +13,7 @@ public class CurrentRitualInfo
     public CurrentRitualInfo(IngredientInstance centralIngredient, IngredientInstance[] ingredients, RitualPlatePiece outerPiece, RitualPlatePiece middlePiece, RitualPlatePiece centerPiece)
     {
         this.centralIngredient = centralIngredient;
+
         this.ingredients = ingredients;
 
         this.outerPiece = outerPiece;

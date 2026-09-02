@@ -5071,6 +5071,14 @@ MonoBehaviour:
   ItemConversionTimer: 4
   LeftPlate: {fileID: 9115831094124952379}
   RightPlate: {fileID: 7619599705404849540}
+  CauldronInternalCollider: {fileID: 1326381897285642471}
+  GemFinishRecipe: {fileID: 11400000, guid: 4939cfa7c46d228409b852ba36491982, type: 2}
+  TriangleGemMesh: {fileID: 2649185500690448354, guid: 74700f55f64e19c43b6b1f37d0b27688,
+    type: 3}
+  SquareGemMesh: {fileID: 5869761508291144630, guid: f51c40f58ed7fc744967f6e01a32ac7b,
+    type: 3}
+  RoundGemMesh: {fileID: 1374574391958156698, guid: 135eb7d1ae9425f438ec0fe5ef24d3dc,
+    type: 3}
   CauldronStepProgress:
     m_PersistentCalls:
       m_Calls:
@@ -5201,6 +5209,21 @@ MonoBehaviour:
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: IngredientInstance, Assembly-CSharp
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  CauldronIngredientFail:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8718831929152046076}
+        m_TargetAssemblyTypeName: CauldronEffects, Assembly-CSharp
+        m_MethodName: IngredientFail
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -20678,6 +20701,8 @@ MonoBehaviour:
   StepProgressSoundVolume: 0.03
   RecipeFailSound: {fileID: 8300000, guid: fefc666db0483874aa5e83a70a10005f, type: 3}
   RecipeFailSoundVolume: 0.04
+  IngredientFailSound: {fileID: 8300000, guid: 3597b3361591ff541be97e096c777974, type: 3}
+  IngredientFailVolume: 0.04
   RisingBubblePS: {fileID: 6585192288700515179}
   SurfaceBubblePS: {fileID: 3545717233143691720}
 --- !u!1 &7805310781247987954

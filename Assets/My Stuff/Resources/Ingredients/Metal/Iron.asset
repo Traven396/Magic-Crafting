@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc4c8c3c5cdef424eb0eea2c9616da6d, type: 3}
+  m_Name: Iron
+  m_EditorClassIdentifier: 
+  Name: Iron
+  Icon: {fileID: 0}
+  IsDiscoverable: 1
+  _AspectTags: []
+  _AssociatedMaterial: {fileID: 2100000, guid: fb238a10ec2f28745bf9033c558af63e, type: 2}
+  Description: 
+  _CanMelt: 1
+  _MeltingTemperature: 1000
+  _LiquidColor: {r: 0.87169814, g: 0.22480184, b: 0, a: 1}
+  _MeltedStatModifiers:
+  - statDefinition: {fileID: 11400000, guid: d9db6c72e1b3a5b4c8a1aafa1510a344, type: 2}
+    value: 10
+    modifierType: 100
+  - statDefinition: {fileID: 11400000, guid: 69940c352bf40b449a2895c0543cf34b, type: 2}
+    value: -5
+    modifierType: 100
+  - statDefinition: {fileID: 11400000, guid: 52d44a302549cbc45aa2c9f0adc586b7, type: 2}
+    value: 20
+    modifierType: 100
+  _IsAlchemyIngredient: 0

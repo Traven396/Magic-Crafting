@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 525cd0a88e1ef2f40bfa078b04190c53, type: 3}
+  m_Name: Wand Completion Recipe
+  m_EditorClassIdentifier: 
+  PossiblePatterns:
+  - InputConstellation: {fileID: 11400000, guid: 05138a0aaa34bc049bd66d317ba1872c,
+      type: 2}
+    OutputItem: {fileID: 5339856348436512575, guid: 34629efb80cf4f648b304c7e5141f2d4,
+      type: 3}
+  CentralIngredient: {fileID: 11400000, guid: 6ce0d6c3b05fa0940b4a44c3c0fcca1a, type: 2}
+  RequiredCenterID: 3
+  RequiredMiddleID: 1
+  RequiredOuterID: 4
+  AdditionalConditions:
+  - rid: 2751583434316709953
+  references:
+    version: 2
+    RefIds:
+    - rid: 2751583434316709953
+      type: {class: RitualWandCompleteCondition, ns: , asm: Assembly-CSharp}
+      data: 

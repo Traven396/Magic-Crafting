@@ -24,6 +24,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: ee571d9fb0ba8bc45b5a1526d9b44a61,
         type: 2}
+    - target: {fileID: 8645704991622454427, guid: 3ba8c9d8128e0a74ca64e85e707ea62f,
+        type: 3}
+      propertyPath: _LiquidYield
+      value: 150
+      objectReference: {fileID: 0}
     - target: {fileID: 8819910795715072549, guid: 3ba8c9d8128e0a74ca64e85e707ea62f,
         type: 3}
       propertyPath: m_LocalPosition.x

@@ -1,3 +1,4 @@
+using Alchemy.Inspector;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -14,12 +15,12 @@ public class KilnCrucible : MonoBehaviour
     //Have it work like in Hydroneer, where once its inside the crucible it cant collide with any of the other things inside of it, to save on space.
     //They should still be grabbable so you can get them out afterwards if needed.
     [SerializeField] int CoolSpeed = 1;
-    [SerializeField] int _CurrentHeat = 0;
-    public int CurrentHeat { get { return _CurrentHeat; } }
+    [SerializeField] TemperatureController temperatureController;
+    public int CurrentHeat => temperatureController.TemperatureInt;
     [SerializeField] int MaxContainedLiquid = 250;
     [SerializeField] Transform ColliderParent;
-
-    bool isHeating;
+    [SerializeField] Transform PourOrigin;
+    [SerializeField] GameObject StreamPrefab;
 
     List<IngredientInstance> currentInsertedMeltables = new();
     [SerializeField] List<ContainedLiquidMetal> currentContainedLiquidMetal = new();
@@ -27,24 +28,68 @@ public class KilnCrucible : MonoBehaviour
     Collider[] childColliders;
     SkinnedMeshRenderer selfRenderer;
 
+    LiquidStream currentStream;
+
+    float lastMeltCheckTemperature;
+
+
+    //Pouring stuff
+    [Title("Pouring Settings")]
+    [SerializeField] bool DebugPouring = false;
+    bool isPouring;
+
+    [Button]
+    void MeltCurrentIngredients()
+    {
+        if(currentInsertedMeltables.Count > 0)
+        {
+            MeltInternals(true);
+        }
+    }
+
+
     private void Awake()
     {
         childColliders = ColliderParent.GetComponentsInChildren<Collider>();
         selfRenderer = GetComponent<SkinnedMeshRenderer>();
-        
+
+        if (temperatureController == null)
+            temperatureController = GetComponent<TemperatureController>();
+
+        // Match the old FixedUpdate cooling rate of CoolSpeed per physics tick.
+        temperatureController.SetPassiveCoolRate(CoolSpeed / Time.fixedDeltaTime);
+        lastMeltCheckTemperature = temperatureController.Temperature;
+        temperatureController.TemperatureChanged += OnTemperatureChanged;
     }
 
-    private void FixedUpdate()
+    void OnDestroy()
     {
-        if (!isHeating)
+        if (temperatureController == null)
+            return;
+
+        temperatureController.TemperatureChanged -= OnTemperatureChanged;
+    }
+
+    void OnTemperatureChanged(float newTemperature)
+    {
+        if (newTemperature <= lastMeltCheckTemperature)
         {
-            if(_CurrentHeat > 0)
-                DecreaseHeat();
+            lastMeltCheckTemperature = newTemperature;
+            return;
         }
 
-        AttemptPour();
+        lastMeltCheckTemperature = newTemperature;
+        MeltInternals(false);
     }
 
+    private void Update()
+    {
+        //We are only trying to pour if there is any liquid inside of the crucible. Otherwise it would be wasted processing
+        if (currentContainedLiquidMetal.Count > 0)
+            AttemptPour();
+    }
+
+    #region Pouring
     void AttemptPour()
     {
         //We need to check the angle that the crucible is currently at
@@ -52,35 +97,160 @@ public class KilnCrucible : MonoBehaviour
         //The angle we are checking against will be based on the amount of liquid in the crucible as well.
         //Angles of rotation would be checked on every axis except for Y axis
 
+        //If we are currently pouring liquid is determined by calculating the angle
+        //Saving it in a temporary value so we can detect when it changes
+        bool pourCheck = CalculatePour();
+
+        if (isPouring != pourCheck)
+        {
+            isPouring = pourCheck;
+
+            //We were not previously pouring, and now we have started
+            if (isPouring)
+            {
+                StartPouring();
+            }
+            else
+            {
+                EndPouring();
+            }
+        }
+
+        if (isPouring)
+        {
+            ActivelyPour();
+        }
 
     }
 
-
-
-    public void BeginCooling()
+    bool CalculatePour()
     {
-        isHeating = false;
+        //Calculate what the current tipping angle of the crucible is based on its rotation, and return that value as a float
+        float currentAngle = Vector3.Angle(transform.up, Vector3.up);
+
+        float currentFillPercent = (float)currentContainedLiquidMetal.Sum(lm => lm.amount) / (float)MaxContainedLiquid;
+
+        float requiredPourAngle = Mathf.Lerp(80, 40f, currentFillPercent);
+
+        //Debug.Log("Current Angle: " + currentAngle + " Required Angle: " + requiredPourAngle + " Current Fill Percent: " + currentFillPercent);
+
+        if (DebugPouring)
+            requiredPourAngle = 40f;
+
+        return currentAngle >= requiredPourAngle;
     }
 
-    public void IncreaseHeat(int heatAmount)
+    void StartPouring()
     {
-        _CurrentHeat += heatAmount;
-        isHeating = true;
+        currentStream = CreateStream();
 
+        currentStream.Begin();
+    }
+
+    void ActivelyPour()
+    {
+        if (Physics.Raycast(PourOrigin.transform.position, Vector3.down, out RaycastHit hit, 2f, Physics.AllLayers, QueryTriggerInteraction.Collide))
+        {
+
+            if (hit.collider.TryGetComponent(out LiquidInput input))
+            {
+                PourIntoObject(input);
+            }
+            else
+                PourIntoObject(null);
+
+        }
+        else
+        {
+            PourIntoObject(null);
+        }
+
+        UpdateVisualLiquid();
+
+        if (currentContainedLiquidMetal.Count == 0)
+        {
+            //If all of the liquid has been poured then we stop the visuals
+            isPouring = false;
+            EndPouring();
+        }
+    }
+
+    void PourIntoObject(LiquidInput input)
+    {
+        //We need to calculate how much liquid we are pouring out of the crucible based on the angle and the amount of liquid inside of it
+        int totalPourAmount = currentContainedLiquidMetal.Sum(lm => lm.amount);
+
+        //We will pour out .1% of the total amount per second, so we multiply that by Time.deltaTime to get the amount for this frame
+        int pourAmountThisFrame = Mathf.CeilToInt(totalPourAmount * 0.001f * Time.deltaTime);
+
+        //We will only pour out as much as we have, so we clamp it between 0 and the total amount
+        pourAmountThisFrame = Mathf.Clamp(pourAmountThisFrame, 0, totalPourAmount);
+
+        //We will pour out the first liquid in the list, and remove it from the list if it is empty
+        ContainedLiquidMetal liquidToPour = currentContainedLiquidMetal[0];
+
+        if (input)
+        {
+            input.TryAddLiquid(liquidToPour.ingredient, pourAmountThisFrame);
+        }
+
+        liquidToPour.amount -= pourAmountThisFrame;
+
+        if (liquidToPour.amount <= 0)
+        {
+            currentContainedLiquidMetal.RemoveAt(0);
+        }
+        else
+        {
+            currentContainedLiquidMetal[0] = liquidToPour;
+        }
+    }
+
+    void EndPouring()
+    {
+        if(currentStream)
+            currentStream.End();
+
+        currentStream = null;
+    }
+
+    LiquidStream CreateStream()
+    {
+        GameObject streamObject = Instantiate(StreamPrefab, PourOrigin.position, Quaternion.identity, transform);
+        return streamObject.GetComponent<LiquidStream>();
+    } 
+
+    void UpdateVisualLiquid()
+    {
+        if (currentContainedLiquidMetal.Count < 1)
+        {
+            selfRenderer.SetBlendShapeWeight(0, 100f);
+        } 
+        else
+            selfRenderer.SetBlendShapeWeight(0, Mathf.Clamp((1 - ((float)currentContainedLiquidMetal.Sum(lm => lm.amount) / (float)MaxContainedLiquid)) * 100f - 15, 0f, 100f));
+
+        
+    }
+    #endregion
+
+    #region Heating + Melting
+    void MeltInternals(bool ignoreHeat)
+    {
         List<IngredientInstance> onesToRemove = new();
         currentInsertedMeltables.ForEach(m =>
         {
-            if (m.Item.MeltedIngredient.MeltingTemperature <= _CurrentHeat)
+
+            if (m.Item.CanMelt && (m.Item.MeltingTemperature <= CurrentHeat || ignoreHeat))
             {
                 int currentFill = currentContainedLiquidMetal.Sum(liquid => liquid.amount);
 
                 ContainedLiquidMetal addedMetal = new ContainedLiquidMetal();
-                addedMetal.meltableIngredient = m.Item.MeltedIngredient;
-                addedMetal.amount = Mathf.Clamp(m.Item.MeltedAmount, 0, MaxContainedLiquid - currentFill);
+                addedMetal.ingredient = m.Item;
+                addedMetal.amount = Mathf.Clamp(m.LiquidYield, 0, MaxContainedLiquid - currentFill);
 
                 if (addedMetal.amount != 0)
                 {
-                    var sameLiquid = currentContainedLiquidMetal.Where(lm => lm.meltableIngredient == m.Item.MeltedIngredient).ToList();
+                    var sameLiquid = currentContainedLiquidMetal.Where(lm => lm.ingredient == m.Item).ToList();
 
                     if (sameLiquid.Any())
                     {
@@ -88,11 +258,11 @@ public class KilnCrucible : MonoBehaviour
 
                         currentContainedLiquidMetal[currentContainedLiquidMetal.IndexOf(sameLiquid[0])] = addedMetal;
 
-                        //Debug.Log("Added to an already existing metal named: " + addedMetal.meltableIngredient.name + " for a total of: " + addedMetal.amount);
+                        //Debug.Log("Added to an already existing metal named: " + addedMetal.ingredient.name + " for a total of: " + addedMetal.amount);
                     }
                     else
                     {
-                        //Debug.Log("We added a new metal named: " + addedMetal.meltableIngredient.name + " at an amount of: " + addedMetal.amount);
+                        //Debug.Log("We added a new metal named: " + addedMetal.ingredient.name + " at an amount of: " + addedMetal.amount);
                         currentContainedLiquidMetal.Add(addedMetal);
                     }
                 }
@@ -103,32 +273,32 @@ public class KilnCrucible : MonoBehaviour
 
                 onesToRemove.Add(m);
                 Destroy(m.gameObject);
-                
+
             }
         });
 
         currentInsertedMeltables = currentInsertedMeltables.Except(onesToRemove).ToList();
 
-        //We calculate how close to the full value we are
-        //Invert it using 1 - that value
-        //Multiply that value by 100 to get a percentage
-        //Clamp it between 0 and 100 just in case
-        //Then set the blendshape weight to that value so it visually represents how full the crucible is
-        selfRenderer.SetBlendShapeWeight(0, Mathf.Clamp((1 - ((float)currentContainedLiquidMetal.Sum(lm => lm.amount) / (float)MaxContainedLiquid)) * 100f - 15, 0f, 100f));
-    }
-    public void DecreaseHeat()
-    {
-        _CurrentHeat -= CoolSpeed;
+        UpdateVisualLiquid();
     }
 
+
+
+    #endregion
+
+
+    #region Ingredient Attaching
     private void OnTriggerEnter(Collider other)
     {
-        if(other.TryGetComponent(out IngredientInstance instance))
+        if (other.TryGetComponent(out IngredientInstance instance))
         {
-            if(instance.Item.MeltedIngredient)
+            if (!currentInsertedMeltables.Contains(instance))
             {
-                AttachIngredient(instance, other);
-                instance.GetInteractable().selectEntered.AddListener(IngredientGrabbedOut);
+            if (instance.Item.CanMelt)
+                {
+                    AttachIngredient(instance, other);
+                    instance.GetInteractable().selectEntered.AddListener(IngredientGrabbedOut);
+                } 
             }
         }
     }
@@ -138,7 +308,7 @@ public class KilnCrucible : MonoBehaviour
         instance.AttachedRB.isKinematic = true;
         instance.transform.parent = transform;
 
-        foreach(Collider col in childColliders)
+        foreach (Collider col in childColliders)
         {
             Physics.IgnoreCollision(col, instanceCollider, true);
         }
@@ -178,10 +348,12 @@ public class KilnCrucible : MonoBehaviour
         currentInsertedMeltables.Remove(instance);
     }
 
-    [Serializable]
-    struct ContainedLiquidMetal
-    {
-        public MeltableIngredientSO meltableIngredient;
-        public int amount;
-    }
+
+    #endregion
+}
+[Serializable]
+public struct ContainedLiquidMetal
+{
+    public IngredientItemSO ingredient;
+    public int amount;
 }

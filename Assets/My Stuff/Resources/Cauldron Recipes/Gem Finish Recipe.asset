@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4078b93484c17724fa18aa420fa775f4, type: 3}
+  m_Name: Gem Finish Recipe
+  m_EditorClassIdentifier: 
+  InitialIngredients:
+  - {fileID: 11400000, guid: d6f4649a238e0d843ba0cb34b1d98584, type: 2}
+  - {fileID: 11400000, guid: 0916f135ad6b8584d9b76cc92cfba244, type: 2}
+  - {fileID: 11400000, guid: 4fed96f77bfb30e45b4bdfc9696c2958, type: 2}
+  InitialStepEffects:
+    ShallowWaterColor: {r: 0.30596915, g: 0.13725488, b: 0.77254903, a: 0.39215687}
+    DeepWaterColor: {r: 0.77254903, g: 0, b: 0.4956742, a: 0.42745098}
+    Depth: -0.2
+    DepthStrength: 1.5
+    NoiseColor: {r: 0.8117647, g: 0.23921567, b: 0.66119385, a: 0.5921569}
+    NoiseDensity: 5.5
+    NoiseSpeed: 0.03
+    NoiseDistance: 0.8
+    Edge1: -0.3
+    Edge2: 0.6
+    BubbleColor: {r: 0.96862745, g: 0.0117647145, b: 0.86255026, a: 1}
+  Steps: []
+  MaxDunks: 1
+  DunkConversions:
+  - Input: {fileID: 11400000, guid: ca64a81e4d3670b4cb777d5b71975a71, type: 2}
+    Output: {fileID: 9008274291343152911, guid: dd7a3f05ec15a6f4790caf48cfcf0e80,
+      type: 3}
+  - Input: {fileID: 11400000, guid: aadae7e39c75a3a45afc954ea97a4e87, type: 2}
+    Output: {fileID: 9008274291343152911, guid: 9ddd71ccccd7fac4b822edba9063b9d1,
+      type: 3}
+  - Input: {fileID: 11400000, guid: 86ada9db6fd499345ab23e2c76a7adbe, type: 2}
+    Output: {fileID: 9008274291343152911, guid: 9ab78b8e2190edb4a88d5cd4ac2328b8,
+      type: 3}
+  - Input: {fileID: 11400000, guid: 8b20c6875f4a2f64990fbf41d1c732a5, type: 2}
+    Output: {fileID: 9008274291343152911, guid: cdbd26efaea83a24e9d34ac4776521ba,
+      type: 3}
+  - Input: {fileID: 11400000, guid: fc6bde58d1fbbd641a464c2fea455ee8, type: 2}
+    Output: {fileID: 9008274291343152911, guid: eb875b92e6c37db429201018729d2d49,
+      type: 3}
+  MaxBottled: 10
+  references:
+    version: 2
+    RefIds: []

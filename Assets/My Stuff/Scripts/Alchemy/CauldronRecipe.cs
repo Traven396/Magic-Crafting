@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "New Cauldron Recipe", menuName = "Recipes/Cauldron Recipe")]
+[CreateAssetMenu(fileName = "New Cauldron Recipe", menuName = "Crafting/Recipes/Cauldron Recipe")]
 public class CauldronRecipe : ScriptableObject
 {
     [ListViewSettings(ShowBoundCollectionSize = false)]

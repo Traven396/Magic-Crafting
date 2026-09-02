@@ -30,7 +30,7 @@ Material:
   m_LightmapFlags: 2
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 3002
   stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
@@ -63,7 +63,7 @@ Material:
     - _NoiseOffset: 5
     - _NoiseSpeed: 0.03
     - _PixelSize: 32
-    - _QueueControl: 0
+    - _QueueControl: 1
     - _QueueOffset: 0
     - _RotationAmount: 0
     - _Rotation_Speed: 1
@@ -74,7 +74,7 @@ Material:
     - _Background_Color: {r: 0.7584905, g: 0.6857277, b: 0.29051608, a: 0}
     - _DeepWaterColor: {r: 0.06902651, g: 0.06276244, b: 0.7735849, a: 0.5058824}
     - _NoiseColor: {r: 0.7660377, g: 0.7660377, b: 0.7660377, a: 0.60784316}
-    - _ShallowWaterColor: {r: 0.30980396, g: 0.7416051, b: 0.9529412, a: 0.22352941}
+    - _ShallowWaterColor: {r: 0.30980393, g: 0.7416051, b: 0.9529411, a: 0.3529412}
     - _Spiral_Color: {r: 1, g: 1, b: 1, a: 1}
     - _Water_Color_1: {r: 0.43137258, g: 0.5358289, b: 0.9098039, a: 0.8705882}
     - _Water_Color_2: {r: 0.2, g: 0.9625639, b: 1, a: 1}

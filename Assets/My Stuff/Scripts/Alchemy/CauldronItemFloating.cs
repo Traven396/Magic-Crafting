@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class CauldronItemFloating : MonoBehaviour, ITriggerable
@@ -50,10 +49,9 @@ public class CauldronItemFloating : MonoBehaviour, ITriggerable
     public void OnTriggerEnterCall(Collider other)
     {
 
-        if (other.attachedRigidbody)
+        if (other.attachedRigidbody && !floatingObjects.Contains(other.attachedRigidbody))
         {
             floatingObjects.Add(other.attachedRigidbody);
-
         }
     }
 
