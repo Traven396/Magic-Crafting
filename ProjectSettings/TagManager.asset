@@ -11,6 +11,8 @@ TagManager:
   - Middle
   - PlayerFinger
   - TongInteractor
+  - WandFrame
+  - SpellGem
   layers:
   - Default
   - TransparentFX
@@ -19,7 +21,7 @@ TagManager:
   - Water
   - UI
   - Player
-  - 
+  - RenderAbove
   - 
   - 
   - 

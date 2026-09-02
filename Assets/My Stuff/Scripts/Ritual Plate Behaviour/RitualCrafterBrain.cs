@@ -16,6 +16,7 @@ public class RitualCrafterBrain : MonoBehaviour
     [SerializeField] private XRSocketInteractor centerSocket;
     [SerializeField] private XRSocketInteractor middleSocket;
     [SerializeField] private XRSocketInteractor outerSocket;
+    [SerializeField] RitualRecipe WandFinishRecipe;
 
     [Title("Constellation Settings")]
     [SerializeField] GameObject StarGridParent;
@@ -80,16 +81,16 @@ public class RitualCrafterBrain : MonoBehaviour
                     currentMiddlePiece,
                     currentCenterPiece);
 
-                if(ritualInfo.centralIngredient == null || ritualInfo.ingredients == null || ritualInfo.outerPiece == null || ritualInfo.middlePiece == null || ritualInfo.centerPiece == null)
+                if(ritualInfo.centralIngredient == null || /*ritualInfo.ingredients == null ||*/ ritualInfo.outerPiece == null || ritualInfo.middlePiece == null || ritualInfo.centerPiece == null)
                 {
-                    Debug.Log("Not all pieces or ingredients were valid.");
-                    Debug.Log("Central Ingredient: " + ritualInfo.centralIngredient);
+                    //Debug.Log("Not all pieces or ingredients were valid.");
+                    //Debug.Log("Central Ingredient: " + ritualInfo.centralIngredient);
 
                     if(ritualInfo.ingredients != null)
                     {
                         foreach (IngredientItemSO ingredient in ritualInfo.ingredients)
                         {
-                            Debug.Log("Outer Ingredient: " + ingredient);
+                            //Debug.Log("Outer Ingredient: " + ingredient);
                         } 
                     }
 
@@ -156,14 +157,23 @@ public class RitualCrafterBrain : MonoBehaviour
     }
     void FinishRecipe(RitualRecipe.RitualRecipeOutput output)
     {
-        Instantiate(output.OutputItem, transform.position + (Vector3.up * 0.5f), Quaternion.identity);
+        GameObject spawnedItem = Instantiate(output.OutputItem, transform.position + (Vector3.up * 0.5f), Quaternion.identity);
 
+        if(currentStartedRecipe == WandFinishRecipe)
+        {
+            spawnedItem.GetComponent<FinishedWand>().InitializeWand(CurrentCentralIngredient.GetComponent<ProtoWand>());
+        }
         Destroy(CurrentCentralIngredient.gameObject);
 
-        foreach (IngredientInstance ingredient in CurrentOuterIngredients)
+        if (CurrentOuterIngredients.Count() > 0)
         {
-            Destroy(ingredient.gameObject);
+            foreach (IngredientInstance ingredient in CurrentOuterIngredients)
+            {
+                Destroy(ingredient.gameObject);
+            } 
         }
+
+        currentStartedRecipe = null;
     }
 
     public void OuterSocketChanged()

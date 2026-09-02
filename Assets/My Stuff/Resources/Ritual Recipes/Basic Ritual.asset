@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 525cd0a88e1ef2f40bfa078b04190c53, type: 3}
+  m_Name: Basic Ritual
+  m_EditorClassIdentifier: 
+  PossiblePatterns:
+  - InputConstellation: {fileID: 11400000, guid: 7a742a73d6667ae42bba4d03c55f1df6,
+      type: 2}
+    OutputItem: {fileID: 5019598149960487663, guid: dbcc5299b4f444242a2f61dfd18b0482,
+      type: 3}
+  CentralIngredient: {fileID: 11400000, guid: d6f4649a238e0d843ba0cb34b1d98584, type: 2}
+  RequiredCenterID: 3
+  RequiredMiddleID: 1
+  RequiredOuterID: 4
+  AdditionalConditions: []
+  references:
+    version: 2
+    RefIds: []

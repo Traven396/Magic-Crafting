@@ -1,3 +1,4 @@
+using AgeOfEnlightenment.Stats;
 using Alchemy.Inspector;
 using NUnit.Framework;
 using System;
@@ -27,6 +28,9 @@ public class CauldronBrain : MonoBehaviour, ITriggerable
     [SerializeField] CauldronResetPlate LeftPlate;
     [SerializeField] CauldronResetPlate RightPlate;
     [SerializeField] BoxCollider CauldronInternalCollider;
+    [Title("Specialty Crafting Recipes")]
+    [SerializeField] CauldronRecipe GemFinishRecipe;
+    [SerializeField] Mesh TriangleGemMesh, SquareGemMesh, RoundGemMesh;
 
     //Reference to the stirring stick placed into the cauldron
     CauldronStirStick _stirringStick;
@@ -81,6 +85,7 @@ public class CauldronBrain : MonoBehaviour, ITriggerable
 
     public UnityEvent<IngredientInstance> CauldronIngredientConsume;
     public UnityEvent<IngredientInstance, float> CauldronIngredientConvert;
+    public UnityEvent<GameObject> CauldronIngredientFail;
 
     private void Awake()
     {
@@ -174,6 +179,12 @@ public class CauldronBrain : MonoBehaviour, ITriggerable
 
             _manager.SelectEnter(currentGrabber, newGrabbable);
         }
+
+        if(currentRecipe == GemFinishRecipe)
+        {
+            FinishGem(convertedIngredient, finishedIngredient.gameObject);
+        }
+
 
         convertedIngredientCount++;
 
@@ -334,6 +345,8 @@ public class CauldronBrain : MonoBehaviour, ITriggerable
         CauldronInternalCollider.center = Vector3.zero;
 
         CurrentStirAmount = 0;
+
+        convertedIngredientCount = 0;
         //-----------------------------------------------------------------------------------------------------//
         //The ingredients will still be there and the recipe will not start again
         CauldronStir?.Invoke(CurrentStirAmount);
@@ -347,13 +360,16 @@ public class CauldronBrain : MonoBehaviour, ITriggerable
     public void OnTriggerEnterCall(Collider other)
     {
         //Ingredient added or the stir stick placed into the cauldron
+        var addedIngredient = other.gameObject.GetComponent<IngredientInstance>();
         
-        var addedIngredient = other.gameObject.GetComponentInParent<IngredientInstance>();
+        if(!addedIngredient)
+            addedIngredient = other.gameObject.GetComponentInParent<IngredientInstance>();
 
         if (addedIngredient)
         {
-            if (recipeComplete)
+            if (recipeComplete && !convertingIngredientTimers.ContainsKey(addedIngredient))
             {
+                
                 if (currentRecipe.GetMaxDunks() - convertedIngredientCount > convertingIngredientTimers.Count)
                 {
                     if (currentRecipe.CheckDunkConversion(addedIngredient.Item))
@@ -361,18 +377,19 @@ public class CauldronBrain : MonoBehaviour, ITriggerable
                         convertingIngredientTimers.Add(addedIngredient, Time.time);
 
                         //The first time an convertable ingredient is added, we start the foam thing a little bit later so that it has time to fully get submerged
-                        if(convertingIngredientTimers.Count == 1)
+                        if (convertingIngredientTimers.Count == 1)
                             Invoke(nameof(DunkIngredientEnter), 0.3f);
-                    } 
+                    }
                 }
+                
 
                 //We return regardless as to not do unnecessary checks when in a finished recipe state
                 return;
             }
 
 
-
-            currentAddedIngredients.Add(addedIngredient);
+            if(!currentAddedIngredients.Contains(addedIngredient))
+                currentAddedIngredients.Add(addedIngredient);
 
 
             if(!dirtyWater && !recipeComplete)
@@ -403,9 +420,12 @@ public class CauldronBrain : MonoBehaviour, ITriggerable
 
     public void OnTriggerExitCall(Collider other)
     {
-       
+
         //Ingredient taken out
-        var removedIngredient = other.gameObject.GetComponentInParent<IngredientInstance>();
+        var removedIngredient = other.gameObject.GetComponent<IngredientInstance>();
+
+        if (!removedIngredient)
+            removedIngredient = other.gameObject.GetComponentInParent<IngredientInstance>();
 
         if (recipeComplete)
         {
@@ -446,5 +466,50 @@ public class CauldronBrain : MonoBehaviour, ITriggerable
             if (_stirringStick)
                 _stirringStick = null;
         }
+    }
+
+
+
+
+    void FinishGem(GameObject newlyCreatedGem, GameObject oldGem)
+    {
+        //Pass along the quality
+        //Also finalize the cut to the desired shape
+        //Depending on the quality we use a different mesh. IN THE FUTURE
+
+        DeformableGem oldGemScript = oldGem.GetComponent<DeformableGem>();
+
+        if(oldGemScript.GetGemQuality() == 0)
+        {
+            //If the quality of the gem was too low, IE it failed, then we will destroy it.
+            CauldronIngredientFail?.Invoke(newlyCreatedGem);
+
+            Destroy(newlyCreatedGem);
+            
+            return;
+        }
+
+
+        SpellGem finalGem = newlyCreatedGem.GetComponent<SpellGem>();
+        finalGem.Quality = oldGemScript.GetGemQuality();
+        finalGem.CutType = oldGemScript.DesiredCut;
+
+        switch (oldGemScript.DesiredCut)
+        {
+            case GemCutPlate.DebugCutTypes.None:
+                Debug.Log("BLEAH BALH BLAH");
+                break;
+            case GemCutPlate.DebugCutTypes.Round:
+                finalGem.Filter.mesh = RoundGemMesh;
+                break;
+            case GemCutPlate.DebugCutTypes.Square:
+                finalGem.Filter.mesh = SquareGemMesh;
+                break;
+            case GemCutPlate.DebugCutTypes.Triangle:
+                finalGem.Filter.mesh = TriangleGemMesh;
+                break;
+        }
+
+        
     }
 }

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "New Ritual Recipe", menuName = "Recipes/Ritual Recipe")]
+[CreateAssetMenu(fileName = "New Ritual Recipe", menuName = "Crafting/Recipes/Ritual Recipe")]
 public class RitualRecipe : ScriptableObject
 {
     [Title("Crafting Result")]
@@ -13,9 +13,9 @@ public class RitualRecipe : ScriptableObject
     public RitualRecipeOutput[] PossiblePatterns;
     [Title("Crafting Requirements")]
     public IngredientItemSO CentralIngredient;
-    public RitualPlatePiece RequiredCenter;
-    public RitualPlatePiece RequiredMiddle;
-    public RitualPlatePiece RequiredOuter;
+    public int RequiredCenterID;
+    public int RequiredMiddleID;
+    public int RequiredOuterID;
 
     [SerializeReference]
     public List<IRecipeCondition> AdditionalConditions = new List<IRecipeCondition>();
@@ -28,9 +28,9 @@ public class RitualRecipe : ScriptableObject
             Debug.Log("All plates not placed");
             return false; 
         }
-        if (ritualInfo.centerPiece.PieceID != RequiredCenter.PieceID ||
-            ritualInfo.middlePiece.PieceID != RequiredMiddle.PieceID ||
-            ritualInfo.outerPiece.PieceID != RequiredOuter.PieceID)
+        if (ritualInfo.centerPiece.PieceID != RequiredCenterID ||
+            ritualInfo.middlePiece.PieceID != RequiredMiddleID ||
+            ritualInfo.outerPiece.PieceID != RequiredOuterID)
         { 
             Debug.Log("Incorrect plate pieces");
             return false; 

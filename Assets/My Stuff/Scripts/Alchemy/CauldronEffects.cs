@@ -14,6 +14,8 @@ public class CauldronEffects : MonoBehaviour
     [SerializeField] float StepProgressSoundVolume;
     [SerializeField] AudioClip RecipeFailSound;
     [SerializeField] float RecipeFailSoundVolume;
+    [SerializeField] AudioClip IngredientFailSound;
+    [SerializeField] float IngredientFailVolume;
     [Title("Particle Systems")]
     [SerializeField] ParticleSystem RisingBubblePS;
     [SerializeField] ParticleSystem SurfaceBubblePS;
@@ -102,7 +104,12 @@ public class CauldronEffects : MonoBehaviour
 
         SoundManagerSO.PlayClipAtPoint(RecipeFailSound, transform.position, RecipeFailSoundVolume);
     }
+    public void IngredientFail(GameObject failedIngredient)
+    {
+        //Maybe we at some point play a visual effect here. Like a puff of smoke?
 
+        SoundManagerSO.PlayClipAtPoint(IngredientFailSound, failedIngredient.transform.position, IngredientFailVolume, 0.1f, 0.1f);
+    }
     public void IngredientConvert(IngredientInstance converted, float amount)
     {
         _renderer.SetBlendShapeWeight(0, amount);

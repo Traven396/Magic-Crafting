@@ -34,15 +34,15 @@ public class RitualRecipeManager : MonoBehaviour
 
         if (centerPlate)
         {
-            smallerList = System.Array.FindAll(smallerList, recipe => recipe.RequiredCenter.PieceID == centerPlate.PieceID);
+            smallerList = System.Array.FindAll(smallerList, recipe => recipe.RequiredCenterID == centerPlate.PieceID);
         }
         if(middlePlate)
         {
-            smallerList = System.Array.FindAll(smallerList, recipe => recipe.RequiredMiddle.PieceID == middlePlate.PieceID);
+            smallerList = System.Array.FindAll(smallerList, recipe => recipe.RequiredMiddleID == middlePlate.PieceID);
         }
         if(outerPlate)
         {
-            smallerList = System.Array.FindAll(smallerList, recipe => recipe.RequiredOuter.PieceID == outerPlate.PieceID);
+            smallerList = System.Array.FindAll(smallerList, recipe => recipe.RequiredOuterID == outerPlate.PieceID);
         }
 
         return smallerList;
