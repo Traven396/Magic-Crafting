@@ -3,52 +3,81 @@ namespace AgeOfEnlightenment.Spellcasting
     using Alchemy.Inspector;
     using UnityEngine;
 
+    /// <summary>
+    /// The MasterSpellcaster is the input agnostic designator and receiver of input.
+    /// It keeps track of SpellcastingSessions that are currently active so that they can carry out their entire lifespan with no issues
+    /// 
+    /// It only creates a Session if the SpellSequenceTracker tells it that a SpellRoute has been fully completed
+    /// </summary>
     public class MasterSpellcaster : MonoBehaviour
     {
         [Title("Spellcasting Settings")]
         [SerializeField] SpellDefinitionSO _ActiveSpell;
-        [Title("Scene References")]
-        [SerializeField] Transform _CastOriginPoint;
-        [SerializeField] Transform _CasterTransform;
+        Transform _CastOriginPoint;
+        Transform _CasterTransform;
 
-        //Need a dictionary to hold all the active spell sessions, and when creating a new one we pass along a unique key for them to check back with
+        SpellSequenceTracker _SequenceTracker;
 
-        //This is the method called every update
-        public void Spell_Tick()
+
+        private SpellcastingSession _currentSession;
+        public SpellcastingSession CurrentSession => _currentSession;
+
+        private void Awake()
         {
+            if(_ActiveSpell != null)
+            {
+                _SequenceTracker = new SpellSequenceTracker(_ActiveSpell);
+            }
+        }
+        private void Update()
+        {
+            _SequenceTracker?.Tick(Time.time);
 
+            if (_currentSession == null) return;
+
+            _currentSession.Tick(Time.deltaTime);
+
+            if (_currentSession.IsComplete) _currentSession = null;
         }
 
-
-        public void Spell_PrimaryInput_Press()
+        public void SetSpellDefinition(SpellDefinitionSO spellDefinition)
         {
+            if (_currentSession != null) return;
 
+            _ActiveSpell = spellDefinition;
+
+            _SequenceTracker = new SpellSequenceTracker(_ActiveSpell);
         }
 
-        public void Spell_PrimaryInput_Hold()
+        public void SetCastOrigin(Transform castOriginPoint)
         {
+            if(_currentSession != null) return;
 
+            _CastOriginPoint = castOriginPoint;
         }
 
-        public void Spell_PrimaryInput_Release()
+        public void SpellButton_Press(SpellButton button)
         {
+            if (_SequenceTracker == null) return;
 
+            TryStartSession(_SequenceTracker.ButtonPressed(button, Time.time));
         }
 
-
-        public void Spell_SecondaryInput_Press()
+        public void SpellButton_Release(SpellButton button)
         {
+            if (_SequenceTracker == null) return;
 
+            TryStartSession(_SequenceTracker.ButtonReleased(button, Time.time));
         }
 
-        public void Spell_SecondaryInput_Hold()
+        private void TryStartSession(SpellActivationRoute route)
         {
+            if (route == null) return;
+            if (_currentSession != null) return;
+            if (_CastOriginPoint == null) return;
 
-        }
-
-        public void Spell_SecondaryInput_Release()
-        {
-
+            _currentSession = new SpellcastingSession(_ActiveSpell, route, this, _CastOriginPoint);
+            _currentSession.Begin();
         }
     }
 

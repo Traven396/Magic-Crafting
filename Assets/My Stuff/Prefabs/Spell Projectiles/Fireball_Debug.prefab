@@ -9,11 +9,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 680474846230643601}
+  - component: {fileID: 1574770894984651661}
   - component: {fileID: 502400912965170662}
   - component: {fileID: 8478149483853136678}
   - component: {fileID: 1158828888921639581}
   - component: {fileID: 2430985405325921338}
-  - component: {fileID: 1574770894984651661}
   m_Layer: 0
   m_Name: Fireball_Debug
   m_TagString: Untagged
@@ -36,6 +36,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1574770894984651661
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2196924460264218457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39f07da2e122836408952d97ba7ca27a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!33 &502400912965170662
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -137,15 +149,3 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &1574770894984651661
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2196924460264218457}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 39f07da2e122836408952d97ba7ca27a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

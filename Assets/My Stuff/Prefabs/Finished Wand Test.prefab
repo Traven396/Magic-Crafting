@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 660820696121672099}
   m_Layer: 0
-  m_Name: Spell Cast Point
+  m_Name: Wand Tip (Cast Origin)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -213,6 +213,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3655323160955677160}
   - component: {fileID: 5321613109382492462}
+  - component: {fileID: 4432008045640597534}
   - component: {fileID: 9169981868934933116}
   - component: {fileID: 4317244451839494163}
   - component: {fileID: 981247516347995645}
@@ -273,11 +274,26 @@ MonoBehaviour:
       AssociatedStat: {fileID: 0}
       StatValue:
         BaseValue: 0
-  _SpellCastPoint: {fileID: 660820696121672099}
+  _WandTip: {fileID: 660820696121672099}
   _WandCore: {fileID: 5730085131512703062}
   _WandFrameTop: {fileID: 6122463940184086644}
   _WandFrameBottom: {fileID: 5900829571753649980}
   _SpellGem: {fileID: 8919996852755928641}
+--- !u!114 &4432008045640597534
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5339856348436512575}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d86485254efea3e4ba0ea2be71693e90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _ActiveSpell: {fileID: 0}
+  _CastOriginPoint: {fileID: 0}
+  _CasterTransform: {fileID: 0}
 --- !u!54 &9169981868934933116
 Rigidbody:
   m_ObjectHideFlags: 0
