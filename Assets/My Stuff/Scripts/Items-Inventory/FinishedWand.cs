@@ -14,9 +14,9 @@ public class FinishedWand : MonoBehaviour
     //Grab interaction
     //Casting of spells
     [Title("Spellcasting Settings")]
-    [SerializeField] SpellDefinitionSO _Spell;
+    [SerializeField] SpellDefinitionSO _GemSpell;
     [SerializeField] WandStats _Stats;
-    [SerializeField] Transform _SpellCastPoint;
+    [SerializeField] Transform _WandTip;
 
     [Title("Object References")]
     [SerializeField] Transform _WandCore;
@@ -41,8 +41,15 @@ public class FinishedWand : MonoBehaviour
     XRGrabInteractable _GrabInteractable;
 
 
+    MasterSpellcaster _Spellcaster;
+
     private void Awake()
     {
+        _Spellcaster = GetComponent<MasterSpellcaster>();
+
+        if (!_Spellcaster)
+            Debug.LogError($"{name} does not have a spellcaster in it. Fix that");
+
         _GrabInteractable = GetComponent<XRGrabInteractable>();
 
         _CoreRenderer = _WandCore.GetComponent<MeshRenderer>();
@@ -103,21 +110,20 @@ public class FinishedWand : MonoBehaviour
             return;
         }
 
-        _Spell = chosenSpell.First().Spell;
+        _GemSpell = chosenSpell.First().Spell;
 
         //We also need to set up the visuals for this item. Like making sure the correct frame and material are applied to it.
 
-
+        _Spellcaster.SetSpellDefinition(_GemSpell);
+        _Spellcaster.SetCastOrigin(_WandTip);
     }
 
     void ActivateWand_Press(ActivateEventArgs args)
     {
-        if (_Spell)
-            _Spell.Activate_Press(_SpellCastPoint);
+        _Spellcaster.SpellButton_Press(SpellButton.Primary);
     }
     void ActivateWand_Release(DeactivateEventArgs args)
     {
-        if(_Spell)
-            _Spell.Activate_Release(_SpellCastPoint);
+        _Spellcaster.SpellButton_Release(SpellButton.Primary);
     }
 }
