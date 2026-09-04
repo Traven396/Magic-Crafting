@@ -9,14 +9,13 @@ namespace AgeOfEnlightenment.Spellcasting
         SpellcastingSession _ownerSession;
         bool _hasResolved;
 
-        GameObject _impactEffect;
 
         private void Awake()
         {
             GetComponent<Collider>().enabled = false;
         }
 
-        public void Initialize(SpellcastingSession session, Vector3 shootDirection, float speed, float lifeTime, GameObject impactVFX)
+        public void Initialize(SpellcastingSession session, Vector3 shootDirection, float speed, float lifeTime)
         {
             _ownerSession = session;
 
@@ -28,7 +27,6 @@ namespace AgeOfEnlightenment.Spellcasting
                 return;
             }
 
-            _impactEffect = impactVFX;
 
             _rigidbody.linearVelocity = shootDirection.normalized * speed;
             Destroy(gameObject, lifeTime);
@@ -45,10 +43,6 @@ namespace AgeOfEnlightenment.Spellcasting
             _ownerSession.Notify_ProjectileHit(this, collision);
             Debug.Log($"Ok, we hit something, and its name is {collision.gameObject.name}");
 
-            if (_impactEffect)
-            {
-                Instantiate(_impactEffect, collision.GetContact(0).point, Quaternion.identity);
-            }
             Destroy(gameObject);
         }
 

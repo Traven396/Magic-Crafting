@@ -13,16 +13,67 @@ MonoBehaviour:
   m_Name: Magic Missile
   m_EditorClassIdentifier: 
   _ActivationRoutes:
-  - _PrimaryButtonState: 0
-    _SecondaryButtonState: 0
-  - _PrimaryButtonState: 0
-    _SecondaryButtonState: 0
-  _SpellType: 0
-  _ProjectilePrefab: {fileID: 0}
-  _SpellShootDirection: 0
-  _ProjectileSpeed: 0
-  _ProjectileLifetime: 0
-  _RequireCharging: 0
-  _ChargeTime: 0
-  _SpawnPreviewOnPress: 0
-  _PreviewPrefab: {fileID: 0}
+  - _name: Basic Cast
+    _firstStep:
+      _name: Trigger Press
+      _eventType: 0
+      _button: 0
+      _gesture:
+        _gestureType: 0
+        _direction: 0
+        _velocitySpace: 0
+        _overrideMinimumSpeed: 0
+        _minimumSpeed: 0
+      _requiredCharge: 0
+      RequiredButtonsToBeHeld: 
+      _timeoutSeconds: 0
+      _onStartedActions:
+      - name: SpawnProjectileAtOrigin
+        _type: 6
+        _runtimeObjectKey: projectile
+        _objectPrefab: {fileID: 2196924460264218457, guid: f5e52099def87a74db82186f683f5918,
+          type: 3}
+        _shootDirection: 0
+        _projectileSpeed: 0
+        _projectileLifetime: 0
+        _projectileCallbacks: []
+        _audioClip: {fileID: 0}
+        _volume: 0
+      _onCompletionActions: []
+      _finalStep: 0
+      _nextSteps:
+      - _name: Trigger Release
+        _eventType: 1
+        _button: 0
+        _gesture:
+          _gestureType: 0
+          _direction: 0
+          _velocitySpace: 0
+          _overrideMinimumSpeed: 0
+          _minimumSpeed: 0
+        _requiredCharge: 0
+        RequiredButtonsToBeHeld: 
+        _timeoutSeconds: 0
+        _onStartedActions: []
+        _onCompletionActions:
+        - name: LaunchProjectile
+          _type: 7
+          _runtimeObjectKey: projectile
+          _objectPrefab: {fileID: 0}
+          _shootDirection: 2
+          _projectileSpeed: 5
+          _projectileLifetime: 3
+          _projectileCallbacks:
+          - rid: 2330997725644718153
+          _audioClip: {fileID: 0}
+          _volume: 0
+        _finalStep: 1
+        _nextSteps: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 2330997725644718153
+      type: {class: SpellProjectile_DebugInfo, ns: AgeOfEnlightenment.Spellcasting,
+        asm: Assembly-CSharp}
+      data:
+        _callbackType: 2

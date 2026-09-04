@@ -13,10 +13,22 @@ namespace AgeOfEnlightenment.Spellcasting
         //For multiple casting methods you add more activation routes, which contain all of the settings needed to cutomize the spell.
 
         //Later on this object will contain the information of the spell like descriptions, tooltips, icons, maybe a color and spell circle?
+        [ListViewSettings(Reorderable = false, ShowFoldoutHeader = false, ShowBoundCollectionSize = false)]
         [SerializeField] List<SpellActivationRoute> _ActivationRoutes;
 
         public IReadOnlyList<SpellActivationRoute> ActivationRoutes => _ActivationRoutes;
 
+        public List<GestureSpec> GetGestureSpecifications()
+        {
+            List<GestureSpec> output = new List<GestureSpec>();
+
+            foreach (SpellActivationRoute route in _ActivationRoutes)
+            {
+                if (route != null) route.GatherPossibleGestures(output);
+            }
+
+            return output;
+        }
     }
 
 }
