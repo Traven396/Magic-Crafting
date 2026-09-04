@@ -9,7 +9,6 @@ public class DebugWand : MonoBehaviour
     [SerializeField] SpellDefinitionSO _NewSpell;
     [Space(10f)]
     [SerializeField] SpellDefinitionSO _ChosenSpell;
-    [SerializeField] Transform _CastOrigin;
 
 
     MasterSpellcaster _caster;
@@ -21,7 +20,6 @@ public class DebugWand : MonoBehaviour
         _interactable = GetComponent<XRGrabInteractable>();
 
         _caster.SetSpellDefinition(_ChosenSpell);
-        _caster.SetCastOrigin(_CastOrigin);
     }
 
     private void OnEnable()

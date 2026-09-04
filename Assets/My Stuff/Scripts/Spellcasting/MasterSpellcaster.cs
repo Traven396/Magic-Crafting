@@ -1,6 +1,7 @@
 namespace AgeOfEnlightenment.Spellcasting
 {
     using Alchemy.Inspector;
+    using System.Collections.Generic;
     using UnityEngine;
 
     /// <summary>
@@ -11,27 +12,34 @@ namespace AgeOfEnlightenment.Spellcasting
     /// </summary>
     public class MasterSpellcaster : MonoBehaviour
     {
-        [Title("Spellcasting Settings")]
-        [SerializeField] SpellDefinitionSO _ActiveSpell;
-        Transform _CastOriginPoint;
-        Transform _CasterTransform;
+        [Header("Spellcasting")]
+        [SerializeField] private SpellDefinitionSO _activeSpell;
+        [SerializeField] private WandGestureInput _gestureInput;
 
-        SpellSequenceTracker _SequenceTracker;
-
-
+        [SerializeField] Transform _castOriginPoint;
+        private SpellSequenceTracker _sequenceTracker;
         private SpellcastingSession _currentSession;
+
         public SpellcastingSession CurrentSession => _currentSession;
 
         private void Awake()
         {
-            if(_ActiveSpell != null)
-            {
-                _SequenceTracker = new SpellSequenceTracker(_ActiveSpell);
-            }
+            RebuildSequenceTracker();
         }
+
+        private void OnEnable()
+        {
+            if (_gestureInput != null) _gestureInput.GestureRecognized += ReceiveGesture;
+        }
+
+        private void OnDisable()
+        {
+            if (_gestureInput != null) _gestureInput.GestureRecognized -= ReceiveGesture;
+        }
+
         private void Update()
         {
-            _SequenceTracker?.Tick(Time.time);
+            if (_currentSession == null) _sequenceTracker?.Tick(Time.time);
 
             if (_currentSession == null) return;
 
@@ -43,40 +51,70 @@ namespace AgeOfEnlightenment.Spellcasting
         public void SetSpellDefinition(SpellDefinitionSO spellDefinition)
         {
             if (_currentSession != null) return;
+            if (_sequenceTracker != null && _sequenceTracker.HasActiveAttempt) return;
 
-            _ActiveSpell = spellDefinition;
+            _activeSpell = spellDefinition;
 
-            _SequenceTracker = new SpellSequenceTracker(_ActiveSpell);
+            RebuildSequenceTracker();
         }
 
         public void SetCastOrigin(Transform castOriginPoint)
         {
-            if(_currentSession != null) return;
+            if (_currentSession != null) return;
+            if (_sequenceTracker != null && _sequenceTracker.HasActiveAttempt) return;
 
-            _CastOriginPoint = castOriginPoint;
+            _castOriginPoint = castOriginPoint;
         }
 
         public void SpellButton_Press(SpellButton button)
         {
-            if (_SequenceTracker == null) return;
+            if (_currentSession != null) return;
 
-            TryStartSession(_SequenceTracker.ButtonPressed(button, Time.time));
+            _sequenceTracker?.ButtonPressed(button, Time.time);
         }
 
         public void SpellButton_Release(SpellButton button)
         {
-            if (_SequenceTracker == null) return;
+            if (_currentSession != null) return;
 
-            TryStartSession(_SequenceTracker.ButtonReleased(button, Time.time));
+            _sequenceTracker?.ButtonReleased(button, Time.time);
         }
 
-        private void TryStartSession(SpellActivationRoute route)
+        public void ReceiveGesture(GestureSpec gesture)
         {
-            if (route == null) return;
             if (_currentSession != null) return;
-            if (_CastOriginPoint == null) return;
 
-            _currentSession = new SpellcastingSession(_ActiveSpell, route, this, _CastOriginPoint);
+            _sequenceTracker?.GestureRecognized(gesture, Time.time);
+        }
+
+        private void RebuildSequenceTracker()
+        {
+            if (_activeSpell == null)
+            {
+                _sequenceTracker = null;
+
+                return;
+            }
+
+            _sequenceTracker = new SpellSequenceTracker(_activeSpell, _castOriginPoint);
+            _sequenceTracker.FinalStepReached += BeginCastingSession;
+
+            if (_gestureInput != null) _gestureInput.SetGestureSpecifications(_activeSpell.GetGestureSpecifications());
+        }
+
+        private void BeginCastingSession(SpellActivationAttempt attempt, RouteStep outcome)
+        {
+            
+            attempt.Cleanup();
+
+            if (_castOriginPoint == null)
+            {
+                Debug.LogError($"Spell {_activeSpell.name} tried to cast without a cast origin.");
+
+                return;
+            }
+
+            _currentSession = new SpellcastingSession(_activeSpell, outcome, this, attempt.ActionContext);
             _currentSession.Begin();
         }
     }

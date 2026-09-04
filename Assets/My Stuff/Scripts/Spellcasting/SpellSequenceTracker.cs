@@ -1,5 +1,6 @@
 namespace AgeOfEnlightenment.Spellcasting
 {
+    using System;
     using System.Collections.Generic;
     using UnityEngine;
     using UnityEngine.Analytics;
@@ -11,129 +12,246 @@ namespace AgeOfEnlightenment.Spellcasting
     /// </summary>
     public class SpellSequenceTracker
     {
-        class RouteProgress
-        {
-            public int NextStepIndex;
-            public float StartedAt;
-        }
-
         SpellDefinitionSO _spellDefinition;
-        HashSet<SpellButton> _heldButtons = new();
-        Dictionary<SpellActivationRoute, RouteProgress> _routeProgress = new Dictionary<SpellActivationRoute, RouteProgress>();
+        Transform _castOrigin;
 
-        public SpellSequenceTracker(SpellDefinitionSO spellDefinition)
+
+        HashSet<SpellButton> _heldButtons = new();
+
+
+        SpellActivationAttempt _currentAttempt;
+        public bool HasActiveAttempt => _currentAttempt != null;
+
+        public event Action<SpellActivationAttempt, RouteStep> StepEntered;
+        public event Action<SpellActivationAttempt, RouteStep> FinalStepReached;
+        public event Action<SpellActivationAttempt> AttemptCancelled;
+
+        public SpellSequenceTracker(SpellDefinitionSO spellDefinition, Transform castOrigin)
         {
             _spellDefinition = spellDefinition;
-
-            foreach (var route in _spellDefinition.ActivationRoutes)
-            {
-                _routeProgress.Add(route, new RouteProgress());
-            }
+            Debug.Log("we received " + castOrigin);
+            _castOrigin = castOrigin;
         }
 
-        public SpellActivationRoute ButtonPressed(SpellButton button, float currentTime)
+        public void ButtonPressed(SpellButton button, float currentTime)
         {
             _heldButtons.Add(button);
 
-            return CheckForCompletedRoute(RouteEvent.ButtonPressed(button), currentTime);
-
+            ProcessEvent(RouteEvent.ButtonPressed(button), currentTime);
         }
 
-        public SpellActivationRoute ButtonReleased(SpellButton button, float currentTime)
+        public void ButtonReleased(SpellButton button, float currentTime)
         {
             _heldButtons.Remove(button);
 
-            return CheckForCompletedRoute(RouteEvent.ButtonReleased(button), currentTime);
+            ProcessEvent(RouteEvent.ButtonReleased(button), currentTime);
         }
 
-        //We would do a similar thing here for when we recognize a gesture.
+        public void GestureRecognized(GestureSpec gesture, float currentTime)
+        {
+            ProcessEvent(RouteEvent.GestureRecognized(gesture), currentTime);
+        }
 
+        private void ProcessEvent(RouteEvent routeEvent, float currentTime)
+        {
+            if (_currentAttempt == null)
+            {
+                TryStartAttempt(routeEvent, currentTime);
+                return;
+            }
+
+            RouteStep matchingChild = FindMatchingChild(_currentAttempt.CurrentStep, routeEvent);
+
+            if (matchingChild != null)
+            {
+                AdvanceToStep(matchingChild, currentTime);
+                return;
+            }
+
+            if (!_currentAttempt.CurrentStep.RequiredButtonsAreHeld(_heldButtons)) CancelCurrentAttempt();
+        }
 
         public void Tick(float currentTime)
         {
-            foreach (var route in _spellDefinition.ActivationRoutes)
+            if (_currentAttempt == null) return;
+            if (_currentAttempt.HasTimedOut(currentTime))
             {
-                if (!route.IsValid()) continue;
-
-                RouteProgress progress = _routeProgress[route];
-
-                if (progress.NextStepIndex == 0) continue;
-
-                if (RouteTimedOut(route, progress, currentTime)) ResetRouteProgress(progress);
+                CancelCurrentAttempt();
+                return;
             }
+
+            if (!_currentAttempt.CurrentStep.RequiredButtonsAreHeld(_heldButtons))
+            {
+                CancelCurrentAttempt();
+                return;
+            }
+
+            TryAdvanceChargeStep(currentTime);
         }
 
-
-
-
-        SpellActivationRoute CheckForCompletedRoute(RouteEvent routeEvent, float currentTime)
+        private void TryStartAttempt(RouteEvent routeEvent, float currentTime)
         {
-            foreach (var route in _spellDefinition.ActivationRoutes)
+            SpellActivationRoute matchingRoute = null;
+
+            foreach (SpellActivationRoute route in _spellDefinition.ActivationRoutes)
             {
-                if (!route.IsValid()) continue;
-
-                RouteProgress progress = _routeProgress[route];
-
-                if (RouteTimedOut(route, progress, currentTime)) ResetRouteProgress(progress);
-
-                if (RouteNextStepMatch(route, progress, routeEvent))
+                if (route == null || !route.IsValid()) continue;
+                
+                if (!route.FirstStep.StepMatch(routeEvent, _heldButtons)) continue;
+                
+                if (matchingRoute != null)
                 {
-                    if(AdvanceStep(route, progress, currentTime))
-                    {
-                        //If we made it into here, then we have fully completed the route, so we reset tracking any others, and return which route was chosen
-                        ResetAllRoutes();
-                        return route;
-                    }
+                    Debug.LogError($"Spell {_spellDefinition.name} has overlapping root route conditions.");
+                    return;
                 }
+
+                matchingRoute = route;
             }
 
-            //If we are all the way out here then none of the routes are completed yet, so null is returned
+            if (matchingRoute == null) return;
 
-            return null;
-        }
 
-        bool RouteNextStepMatch(SpellActivationRoute route, RouteProgress progress, RouteEvent routeEvent)
-        {
-            //If the next step we are trying to check is longer than the actual number of steps, then its false
-            if (progress.NextStepIndex >= route.ActivationSteps.Count) return false;
-
-            RouteStep nextStep = route.ActivationSteps[progress.NextStepIndex];
             
-            return nextStep.StepMatch(routeEvent, _heldButtons);
-        }
+            _currentAttempt = new SpellActivationAttempt(matchingRoute, _castOrigin);
 
-        bool AdvanceStep(SpellActivationRoute route, RouteProgress progress, float currentTime)
-        {
-            //If the step index is 0, then we are completing the first step of this route so we need to save it's time
-            if (progress.NextStepIndex == 0) progress.StartedAt = currentTime;
-
-            progress.NextStepIndex++;
-
-            //If we have reached the end of the step count, then this route is fully completed and we will return it
-            return progress.NextStepIndex >= route.ActivationSteps.Count;
+            AdvanceToStep(matchingRoute.FirstStep, currentTime);
         }
 
 
-        //Compare the current time to when we started tracking the route. If the difference is too much for that route then it has timed out and should stop being tracked.
-        bool RouteTimedOut(SpellActivationRoute route, RouteProgress progress, float currentTime)
+        //We cycle through all of the current possible next steps and see if we reached the charge time for one of them.
+        private void TryAdvanceChargeStep(float currentTime)
         {
-            if (progress.NextStepIndex == 0) return false;
-            if (route.MaximumSequenceSeconds <= 0) return false;
+            RouteStep chargeStep = null;
 
-            return currentTime - progress.StartedAt > route.MaximumSequenceSeconds;
-        }
-
-        void ResetRouteProgress(RouteProgress progress)
-        {
-            progress.NextStepIndex = 0;
-            progress.StartedAt = 0;
-        }
-        void ResetAllRoutes()
-        {
-            foreach (RouteProgress progress in _routeProgress.Values)
+            foreach (RouteStep child in _currentAttempt.CurrentStep.NextSteps)
             {
-                ResetRouteProgress(progress);
+                if (child.EventType != RouteEventType.ChargeTimeReached) continue;
+                if (!child.RequiredButtonsAreHeld(_heldButtons)) continue;
+                if (currentTime - _currentAttempt.TimeCurrentStepEnteredAt < child.RequiredChargeSeconds) continue;
+
+                if (chargeStep != null)
+                {
+                    Debug.LogError($"Route {_currentAttempt.CurrentStep.Name} has overlapping charge branches.");
+                    return;
+                }
+
+                chargeStep = child;
             }
+
+            if (chargeStep != null) AdvanceToStep(chargeStep, currentTime);
+        }
+
+
+        //We look through the possible children steps and find one that has a valid condition based on what event we just fired
+        private RouteStep FindMatchingChild(RouteStep parentStep, RouteEvent routeEvent)
+        {
+            RouteStep matchingChild = null;
+
+            foreach (RouteStep child in parentStep.NextSteps)
+            {
+                if (!child.StepMatch(routeEvent, _heldButtons)) continue;
+
+                if (matchingChild != null)
+                {
+                    Debug.LogError($"Route step {parentStep.Name} has overlapping child conditions.");
+                    return null;
+                }
+
+                matchingChild = child;
+            }
+
+            return matchingChild;
+        }
+
+        //This method is the one that moves to the next step in the tree.
+        private void AdvanceToStep(RouteStep step, float currentTime)
+        {
+            if (step.FinalStep)
+            {
+
+                _currentAttempt.EnterFinalStep(step, currentTime);
+                FinalStepReached?.Invoke(_currentAttempt, step);
+
+                _currentAttempt = null;
+
+                return;
+            }
+
+            _currentAttempt.EnterNonTerminalStep(step, currentTime);
+
+            StepEntered?.Invoke(_currentAttempt, step);
+        }
+
+
+        private void CancelCurrentAttempt()
+        {
+            if (_currentAttempt == null) return;
+
+
+
+            _currentAttempt.Cleanup();
+
+            AttemptCancelled?.Invoke(_currentAttempt);
+
+            _currentAttempt = null;
         }
     }
+
+    /// <summary>
+    /// This class is what we use to track the progression through the different steps before we actually reach a final step and cast something
+    /// 
+    /// It is basically just a fancy way of remembering numbers for where we are in the tree
+    /// </summary>
+    public class SpellActivationAttempt
+    {
+        public SpellActivationRoute Route { get; }
+        public RouteStep CurrentStep { get; private set; }
+        public float TimeCurrentStepEnteredAt { get; private set; }
+        public SpellActionContext ActionContext { get; }
+
+        public SpellActivationAttempt(SpellActivationRoute route, Transform castOrigin)
+        {
+            Route = route;
+            ActionContext = new SpellActionContext(castOrigin);
+
+            
+        }
+
+        public void EnterNonTerminalStep(RouteStep step, float currentTime)
+        {
+            //Now this might seem backwards, but what we are doing is finishing the OLD step, and then starting the new one we are moving to.
+            SpellRouteActionExecutor.ExecuteActions(step.OnStepCompletedActions, ActionContext);
+
+            CurrentStep = step;
+            TimeCurrentStepEnteredAt = currentTime;
+
+            SpellRouteActionExecutor.ExecuteActions(step.OnStepStartActions, ActionContext);
+        }
+        public void Cleanup()
+        {
+            ActionContext.DestroyAllRuntimeObjects();
+        }
+        public void EnterFinalStep(RouteStep step, float currentTime)
+        {
+            
+            CurrentStep = step;
+            TimeCurrentStepEnteredAt = currentTime;
+
+            SpellRouteActionExecutor.ExecuteActions(step.OnStepStartActions, ActionContext);
+        }
+
+        public bool HasTimedOut(float currentTime)
+        {
+            if (CurrentStep == null) return false;
+            if (CurrentStep.TimeoutSeconds <= 0f) return false;
+
+            return currentTime - TimeCurrentStepEnteredAt > CurrentStep.TimeoutSeconds;
+        }
+
+        public void Cancel()
+        {
+            ActionContext.DestroyAllRuntimeObjects();
+        }
+    }
+
 }
