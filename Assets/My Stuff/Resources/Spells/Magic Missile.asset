@@ -29,8 +29,8 @@ MonoBehaviour:
       RequiredButtonsToBeHeld: 00000000
       _timeoutSeconds: 0
       _onStartedActions:
-      - name: SpawnProjectileAtOrigin
-        _type: 6
+      - name: SpawnObjectAtCastOrigin
+        _type: 2
         _runtimeObjectKey: projectile
         _objectPrefab: {fileID: 1120250531953485468, guid: d73e5f2649dfd2940a7c14dd08edd912,
           type: 3}
@@ -40,6 +40,19 @@ MonoBehaviour:
         _shootDirection: 0
         _projectileSpeed: 0
         _projectileLifetime: 0
+        _targetedProjectile: 0
+        _targetSettings:
+          EntityFilter: 0
+          Method: 0
+          Source: 0
+          Direction: 0
+          Selection: 0
+          IgnoredLayers:
+            serializedVersion: 2
+            m_Bits: 0
+          CastDistance: 0
+          CastSize: 0
+        _projectileModifiers: []
         _projectileCallbacks: []
         _audioClip: {fileID: 0}
         _volume: 0
@@ -54,12 +67,25 @@ MonoBehaviour:
         _shootDirection: 0
         _projectileSpeed: 0
         _projectileLifetime: 0
+        _targetedProjectile: 0
+        _targetSettings:
+          EntityFilter: 0
+          Method: 0
+          Source: 0
+          Direction: 0
+          Selection: 0
+          IgnoredLayers:
+            serializedVersion: 2
+            m_Bits: 0
+          CastDistance: 0
+          CastSize: 0
+        _projectileModifiers: []
         _projectileCallbacks: []
         _audioClip: {fileID: 0}
         _volume: 0
       _onCompletionActions:
       - name: LaunchProjectile
-        _type: 7
+        _type: 5
         _runtimeObjectKey: projectile
         _objectPrefab: {fileID: 0}
         _childOfSpawnpoint: 0
@@ -68,6 +94,21 @@ MonoBehaviour:
         _shootDirection: 7
         _projectileSpeed: 10
         _projectileLifetime: 3
+        _targetedProjectile: 1
+        _targetSettings:
+          EntityFilter: 2
+          Method: 1
+          Source: 2
+          Direction: 6
+          Selection: 0
+          IgnoredLayers:
+            serializedVersion: 2
+            m_Bits: 832
+          CastDistance: 15
+          CastSize: 3
+        _projectileModifiers:
+        - rid: 2330997910308126790
+        - rid: 2330997910308126787
         _projectileCallbacks:
         - rid: 2330997910308126786
         _audioClip: {fileID: 0}
@@ -83,3 +124,12 @@ MonoBehaviour:
       data:
         _callbackType: 0
         Damage: 5
+    - rid: 2330997910308126787
+      type: {class: HomingProjectileModifier, ns: AgeOfEnlightenment.Spellcasting,
+        asm: Assembly-CSharp}
+      data:
+        HomingStrength: 60
+    - rid: 2330997910308126790
+      type: {class: LookTowardsLaunchModifier, ns: AgeOfEnlightenment.Spellcasting,
+        asm: Assembly-CSharp}
+      data: 
