@@ -17,10 +17,14 @@ namespace AgeOfEnlightenment.Spellcasting
         [SerializeField] private WandGestureInput _gestureInput;
 
         [SerializeField] Transform _castOriginPoint;
+        //This is temporary. In the future this will be a parent class of anything gesture.
+        [SerializeField] WandGestureInput GestureInput;
         private SpellSequenceTracker _sequenceTracker;
-        private SpellcastingSession _currentSession;
+        private SpellcastingSession _latestSession;
 
-        public SpellcastingSession CurrentSession => _currentSession;
+        List<SpellcastingSession> _activeSessions = new();
+        List<SpellcastingSession> _completedSessions = new();
+
 
         private void Awake()
         {
@@ -39,18 +43,36 @@ namespace AgeOfEnlightenment.Spellcasting
 
         private void Update()
         {
-            if (_currentSession == null) _sequenceTracker?.Tick(Time.time);
+            //if (_currentSession == null) _sequenceTracker?.Tick(Time.time);
 
-            if (_currentSession == null) return;
+            _sequenceTracker?.Tick(Time.time);
 
-            _currentSession.Tick(Time.deltaTime);
+            if(_activeSessions.Count > 0)
+            {
+                _activeSessions.ForEach(session =>
+                {
+                    session.Tick(Time.deltaTime);
 
-            if (_currentSession.IsComplete) _currentSession = null;
+                    //If a session has completed it's task then we add it to a list so we can remove them all at once
+                    if (session.IsComplete)
+                        _completedSessions.Add(session);
+                });
+
+                //We remove from our tracked sessions the one's that have completed already
+                _completedSessions.ForEach(complete => _activeSessions.Remove(complete));
+                _completedSessions.Clear();
+            }
+
+            //if (_currentSession == null) return;
+
+            //_currentSession.Tick(Time.deltaTime);
+
+            //if (_currentSession.IsComplete) _currentSession = null;
         }
 
         public void SetSpellDefinition(SpellDefinitionSO spellDefinition)
         {
-            if (_currentSession != null) return;
+            if (_latestSession != null) return;
             if (_sequenceTracker != null && _sequenceTracker.HasActiveAttempt) return;
 
             _activeSpell = spellDefinition;
@@ -60,7 +82,7 @@ namespace AgeOfEnlightenment.Spellcasting
 
         public void SetCastOrigin(Transform castOriginPoint)
         {
-            if (_currentSession != null) return;
+            if (_latestSession != null) return;
             if (_sequenceTracker != null && _sequenceTracker.HasActiveAttempt) return;
 
             _castOriginPoint = castOriginPoint;
@@ -68,21 +90,21 @@ namespace AgeOfEnlightenment.Spellcasting
 
         public void SpellButton_Press(SpellButton button)
         {
-            if (_currentSession != null) return;
+            //if (_currentSession != null) return;
 
             _sequenceTracker?.ButtonPressed(button, Time.time);
         }
 
         public void SpellButton_Release(SpellButton button)
         {
-            if (_currentSession != null) return;
+            //if (_currentSession != null) return;
 
             _sequenceTracker?.ButtonReleased(button, Time.time);
         }
 
         public void ReceiveGesture(GestureSpec gesture)
         {
-            if (_currentSession != null) return;
+            //if (_currentSession != null) return;
 
             _sequenceTracker?.GestureRecognized(gesture, Time.time);
         }
@@ -96,7 +118,7 @@ namespace AgeOfEnlightenment.Spellcasting
                 return;
             }
 
-            _sequenceTracker = new SpellSequenceTracker(_activeSpell, _castOriginPoint);
+            _sequenceTracker = new SpellSequenceTracker(_activeSpell, _castOriginPoint, GestureInput.GetTracker());
             _sequenceTracker.FinalStepReached += BeginCastingSession;
 
             if (_gestureInput != null) _gestureInput.SetGestureSpecifications(_activeSpell.GetGestureSpecifications());
@@ -104,8 +126,6 @@ namespace AgeOfEnlightenment.Spellcasting
 
         private void BeginCastingSession(SpellActivationAttempt attempt, RouteStep outcome)
         {
-            
-            attempt.Cleanup();
 
             if (_castOriginPoint == null)
             {
@@ -114,8 +134,15 @@ namespace AgeOfEnlightenment.Spellcasting
                 return;
             }
 
-            _currentSession = new SpellcastingSession(_activeSpell, outcome, this, attempt.ActionContext);
-            _currentSession.Begin();
+            _latestSession = new SpellcastingSession(_activeSpell, outcome, this, attempt.ActionContext);
+            _latestSession.Begin();
+
+            _activeSessions.Add(_latestSession);
+        }
+
+        public void CancelAllCasting()
+        {
+            _sequenceTracker.CancelCurrentAttempt();
         }
     }
 

@@ -1,5 +1,6 @@
 namespace AgeOfEnlightenment.Spellcasting
 {
+    using FoxheadDev.GestureDetection;
     using System;
     using System.Collections.Generic;
     using UnityEditor.Timeline.Actions;
@@ -53,7 +54,7 @@ namespace AgeOfEnlightenment.Spellcasting
                 }
             }
 
-            FinishProjectile(projectile);
+            CompleteProjectle(projectile);
         }
         public void Notify_ProjectileExpire(SpellProjectile projectile)
         {
@@ -68,10 +69,10 @@ namespace AgeOfEnlightenment.Spellcasting
                 }
             }
 
-            FinishProjectile(projectile);
+            CompleteProjectle(projectile);
         }
 
-        void FinishProjectile(SpellProjectile projectile)
+        void CompleteProjectle(SpellProjectile projectile)
         {
             if(_activeProjectiles.Contains(projectile))
                 _activeProjectiles.Remove(projectile);
@@ -88,7 +89,7 @@ namespace AgeOfEnlightenment.Spellcasting
 
         }
 
-        public void LaunchProjectile(SpellProjectile projectile, Vector3 direction, float speed, float lifetime, List<SpellProjectileCallbackAction> callbacks)
+        public void LaunchProjectile(SpellProjectile projectile, Vector3 direction, float speed, float lifetime, List<SpellProjectileBehaviourModifier> modifiers, List<SpellProjectileCallbackAction> callbacks, Entity target = null)
         {
             _activeProjectiles.Add(projectile);
 
@@ -96,9 +97,8 @@ namespace AgeOfEnlightenment.Spellcasting
                 if(callbacks.Count > 0)
                     _callbacks.Add(projectile, callbacks);
 
-            projectile.Initialize(this, direction, speed, lifetime);
+            projectile.ActivateAndLaunch(this, direction, speed, lifetime, modifiers, target);
         }
-
     }
 
     //This class is for keeping track of any mid-cast objects that we have. Previews, VFX, and other flair.
@@ -108,11 +108,13 @@ namespace AgeOfEnlightenment.Spellcasting
         private Dictionary<string, GameObject> _runtimeObjects = new();
 
         public Transform CastOrigin { get; private set; }
+        public PhysicsTracker CasterPhysicsTracker { get; private set; }
         public SpellcastingSession AssociatedCastingSession { get; private set; }
 
-        public SpellActionContext(Transform castOrigin)
+        public SpellActionContext(Transform castOrigin, PhysicsTracker tracker)
         {
             CastOrigin = castOrigin;
+            CasterPhysicsTracker = tracker;
         }
 
         public void AttachCastingSession(SpellcastingSession castingSession)
@@ -122,9 +124,12 @@ namespace AgeOfEnlightenment.Spellcasting
 
         public void SetRuntimeObject(string key, GameObject runtimeObject)
         {
-            DestroyRuntimeObject(key);
+            if (!String.IsNullOrEmpty(key))
+            {
+                DestroyRuntimeObject(key);
 
-            _runtimeObjects[key] = runtimeObject;
+                _runtimeObjects[key] = runtimeObject; 
+            }
         }
 
         public bool TryGetRuntimeObject(string key, out GameObject runtimeObject)
@@ -143,6 +148,7 @@ namespace AgeOfEnlightenment.Spellcasting
 
         public void DestroyAllRuntimeObjects()
         {
+            Debug.Log("We just cleared our runtime objects");
             foreach (GameObject runtimeObject in _runtimeObjects.Values)
             {
                 if (runtimeObject != null) UnityEngine.Object.Destroy(runtimeObject);

@@ -26,14 +26,28 @@ namespace AgeOfEnlightenment.Spellcasting
         private readonly Dictionary<string, GestureProbe> _gestureProbes = new Dictionary<string, GestureProbe>();
 
         private PhysicsTracker _physicsTracker;
-
         public event Action<GestureSpec> GestureRecognized;
 
         private void Awake()
         {
             EnsurePhysicsTracker();
         }
-
+        //private void OnEnable()
+        //{
+        //    GestureRecognized += DebugGesture;
+        //}
+        //private void OnDisable()
+        //{
+        //    GestureRecognized -= DebugGesture;
+        //}
+        public PhysicsTracker GetTracker()
+        {
+            return _physicsTracker;
+        }
+        void DebugGesture(GestureSpec spec)
+        {
+            Debug.Log("Valid gesture: " + _physicsTracker.AccelerationStrength.ToString("#.00"));
+        }
         private void Update()
         {
             if (_physicsTracker == null) return;

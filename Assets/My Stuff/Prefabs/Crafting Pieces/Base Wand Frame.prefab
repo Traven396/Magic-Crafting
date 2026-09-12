@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1556941975021425309}
   - component: {fileID: 6087991782080287557}
   - component: {fileID: 7008569128039882290}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Bottom
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -99,7 +99,7 @@ GameObject:
   - component: {fileID: 5639347545458750361}
   - component: {fileID: 3512960573090252334}
   - component: {fileID: 4710138463759172401}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Base Wand Frame
   m_TagString: WandFrame
   m_Icon: {fileID: 0}
@@ -328,7 +328,7 @@ GameObject:
   - component: {fileID: 3858465523737217069}
   - component: {fileID: 8071879975200519938}
   - component: {fileID: 1970789240773225170}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Gem Socket
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -446,7 +446,7 @@ GameObject:
   - component: {fileID: 6573186872654563447}
   - component: {fileID: 5425418870908965924}
   - component: {fileID: 5812307599657687333}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Cap
   m_TagString: Untagged
   m_Icon: {fileID: 0}

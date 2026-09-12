@@ -63,14 +63,18 @@ namespace AgeOfEnlightenment.Spellcasting
     [Serializable]
     public class SpellProjectile_DealDamage : SpellProjectileCallbackAction
     {
+        [SerializeField] int Damage;
         public override void ProjectileCollide(SpellProjectile projectile, Collision collision)
         {
-            throw new NotImplementedException();
+            if(collision.transform.TryGetComponent(out IDamageable targetDamageable))
+            {
+                targetDamageable.ApplyDamage(Damage);
+            }
         }
 
         public override void ProjectileExpire(SpellProjectile projectile)
         {
-            throw new NotImplementedException();
+            Debug.LogError("What am I supposed to deal damage to? Expire callback doesn't work");
         }
     }
     [Serializable]

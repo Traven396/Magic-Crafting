@@ -1,13 +1,15 @@
 namespace AgeOfEnlightenment.Spellcasting
 {
+    using FoxheadDev.GestureDetection;
     using System.Collections.Generic;
     using UnityEngine;
+    using UnityEngine.XR;
 
-	/// <summary>
-	/// This is the big class that will actually handle going through the events between the steps and having them do things
-	/// 
-	/// Spawning prefabs, projectiles, playing audio, haptics, anything you can imagine. All contained here
-	/// </summary>
+    /// <summary>
+    /// This is the big class that will actually handle going through the events between the steps and having them do things
+    /// 
+    /// Spawning prefabs, projectiles, playing audio, haptics, anything you can imagine. All contained here
+    /// </summary>
 	public static class SpellRouteActionExecutor
 	{
         public static void ExecuteActions(IReadOnlyList<RouteAction> actions, SpellActionContext context)
@@ -30,16 +32,12 @@ namespace AgeOfEnlightenment.Spellcasting
 
             switch (action.Type)
             {
-                case RouteActionType.SpawnPreviewAtCastOrigin:
+                case RouteActionType.SpawnObjectAtCastOrigin:
                     SpawnPrefab(action, context);
                     break;
 
                 case RouteActionType.DestroyObjects:
                     context.DestroyRuntimeObject(action.RuntimeObjectKey);
-                    break;
-
-                case RouteActionType.SpawnProjectileAtOrigin:
-                    SpawnPrefab(action, context);
                     break;
 
                 case RouteActionType.LaunchProjectile:
@@ -66,9 +64,15 @@ namespace AgeOfEnlightenment.Spellcasting
 
             GameObject spawnedObject = Object.Instantiate(action.Prefab, context.CastOrigin.position, context.CastOrigin.rotation);
 
+            spawnedObject.transform.localScale = Vector3.one * action.SpawnSize;
+
+            spawnedObject.layer = action.SpawnLayer;
+
+            if (action.ChildOfSpawnpoint)
+                spawnedObject.transform.parent = context.CastOrigin;
+
             context.SetRuntimeObject(action.RuntimeObjectKey, spawnedObject);
         }
-
         private static void LaunchProjectile(RouteAction action, SpellActionContext context)
         {
             if (context.AssociatedCastingSession == null)
@@ -92,12 +96,17 @@ namespace AgeOfEnlightenment.Spellcasting
                 return;
             }
 
-            Vector3 direction = GetShootDirection(action.ShootDirection, context.CastOrigin);
+            Vector3 direction = GetShootDirection(action.ShootDirection, context.CastOrigin, context.CasterPhysicsTracker);
+            Entity target = null;
+            if (action.TargetedProjectile)
+            {
+                target = SpellTargetManager.GetTarget(action.TargetSettings, context);
+            }
 
-            context.AssociatedCastingSession.LaunchProjectile(projectile, direction, action.ProjectileSpeed, action.ProjectileLifetime, action.ProjectileCallbacks);
+            context.AssociatedCastingSession.LaunchProjectile(projectile, direction, action.ProjectileSpeed, action.ProjectileLifetime, action.ProjectileModifiers, action.ProjectileCallbacks, target);
         }
 
-        private static Vector3 GetShootDirection(SpellShootDirection shootDirection, Transform castOrigin)
+        private static Vector3 GetShootDirection(SpellShootDirection shootDirection, Transform castOrigin, PhysicsTracker tracker)
         {
             switch (shootDirection)
             {
@@ -118,6 +127,13 @@ namespace AgeOfEnlightenment.Spellcasting
 
                 case SpellShootDirection.Back:
                     return -castOrigin.forward;
+
+                case SpellShootDirection.PlayerDirection:
+                    return Camera.main.transform.forward;
+
+                case SpellShootDirection.PlayerDirectionWithCastVelocity:
+                    return Vector3.Slerp(tracker.Velocity.normalized, Camera.main.transform.forward, 0.5f) * (tracker.Velocity.magnitude * 5);
+
             }
 
             return castOrigin.forward;

@@ -26,22 +26,32 @@ public class DebugWand : MonoBehaviour
     {
         _interactable.activated.AddListener(Wand_ActivatePress);
         _interactable.deactivated.AddListener(Wand_ActivateRelease);
+
+        _interactable.selectExited.AddListener(Wand_Dropped);
     }
     private void OnDisable()
     {
         _interactable.activated.RemoveListener(Wand_ActivatePress);
         _interactable.deactivated.RemoveListener(Wand_ActivateRelease);
+
+        _interactable.selectExited.RemoveListener(Wand_Dropped);
     }
 
     void Wand_ActivatePress(ActivateEventArgs args)
     {
-        _caster.SpellButton_Press(SpellButton.Primary);
+        if(_interactable.isSelected)
+            _caster.SpellButton_Press(SpellButton.Primary);
     }
     void Wand_ActivateRelease(DeactivateEventArgs args)
     {
-        _caster.SpellButton_Release(SpellButton.Primary);
+        if (_interactable.isSelected)
+            _caster.SpellButton_Release(SpellButton.Primary);
     }
 
+    void Wand_Dropped(SelectExitEventArgs args)
+    {
+        _caster.CancelAllCasting();
+    }
 
     [Button]
     void ChangeSpell()

@@ -24,22 +24,22 @@ namespace AgeOfEnlightenment.Spellcasting
     {
         None,
         Custom,
-        SpawnPreviewAtCastOrigin,
-        DestroyPreview,
+        SpawnObjectAtCastOrigin,
         DestroyObjects,
         PlayAudio,
-        SpawnProjectileAtOrigin,
         LaunchProjectile
     }
-
+    public enum SpellShootDirection { Left, Right, Up, Down, Forward, Back, PlayerDirection, PlayerDirectionWithCastVelocity }
     //This is a way for in the inspector for me to designate what kind of gesture I want to have the player perform.
     //Maybe in the future I can make this more beginner friendly? But for now I know what the different spaces are and everything
     [Serializable]
     public class GestureSpec
     {
+        [Tooltip("Slash means local-Y (Thumb)" + "\n" + "Punch means local-Z (Fingers)" + "\n" + "Push means local-X (Palm: Right = +)")]
         [SerializeField] GestureType _gestureType;
+        bool isFlick => _gestureType == GestureType.Flick;
         [SerializeField] GestureDirection _direction;
-        [SerializeField] GestureVelocitySpace _velocitySpace;
+        [HideIf("isFlick")] [SerializeField] GestureVelocitySpace _velocitySpace;
 
         [SerializeField] bool _overrideMinimumSpeed;
 
@@ -52,12 +52,6 @@ namespace AgeOfEnlightenment.Spellcasting
         public GestureVelocitySpace VelocitySpace => _velocitySpace;
         public bool OverrideSpeed => _overrideMinimumSpeed;
         public float MinimumSpeed => _minimumSpeed;
-
-        //void CheckVelocitySpace()
-        //{
-        //    if(_gestureType == GestureType.Slash)
-        // I could add some input validation stuff here and throw errors if I ever set up an impossible gesture. Currently I won't worry about that though
-        //}
 
         public bool GestureMatches(GestureSpec other)
         {
@@ -110,7 +104,53 @@ namespace AgeOfEnlightenment.Spellcasting
     }
 
 
-    
+    #region Targeting
+
+    public enum TargetMethod
+    {
+        Raycast,
+        SphereCast,
+        CapsuleCast,
+        BoxCast,
+        OverlapSphere,
+        OverlapBox,
+        OverlapCapsule
+    }
+    public enum TargetSelection
+    {
+        Closest,
+        Furthest,
+        All
+    }
+    public enum TargetSource
+    {
+        Caster,
+        CastOrigin,
+        PlayerView
+    }
+
+    //At some point I will add target filters so that things can be more complex. Like "non-player" and it would be all others
+    //But for now we keep it simple
+
+    [Serializable]
+    public struct TargetingSettings
+    {
+        public EntityType EntityFilter;
+        public TargetMethod Method;
+        public TargetSource Source;
+        public SpellShootDirection Direction;
+        public TargetSelection Selection;
+        public LayerMask IgnoredLayers;
+        
+
+        bool sizedType => Method != TargetMethod.Raycast;
+        bool distanceType => Method != TargetMethod.OverlapSphere || Method != TargetMethod.OverlapCapsule || Method != TargetMethod.OverlapBox;
+        [Space(10)]
+        [ShowIf("distanceType")] public float CastDistance;
+        [ShowIf("sizedType")] public float CastSize;
+
+    } 
+    #endregion
 
     [Serializable]
     public class RouteAction
@@ -119,13 +159,13 @@ namespace AgeOfEnlightenment.Spellcasting
         //These are the actions that can happen when a route is reached or finished.
         //They allow for progressive changes to the spell as the player "moves" through it
         [HideInInspector] public string name = "";
-
+        
         [OnValueChanged("ChangeNameStringForOrganization")]
         [SerializeField] RouteActionType _type;
 
 
-        bool gameObjectType => _type == RouteActionType.SpawnPreviewAtCastOrigin || _type == RouteActionType.SpawnProjectileAtOrigin || _type == RouteActionType.DestroyObjects;
-        bool taggedItemType => _type == RouteActionType.SpawnProjectileAtOrigin || _type == RouteActionType.SpawnPreviewAtCastOrigin || _type == RouteActionType.LaunchProjectile || _type == RouteActionType.DestroyObjects;
+        bool gameObjectType => _type == RouteActionType.SpawnObjectAtCastOrigin || _type == RouteActionType.DestroyObjects;
+        bool taggedItemType => _type == RouteActionType.SpawnObjectAtCastOrigin || _type == RouteActionType.LaunchProjectile || _type == RouteActionType.DestroyObjects;
         bool projectileType => _type == RouteActionType.LaunchProjectile;
         bool audioType => _type == RouteActionType.PlayAudio;
         
@@ -137,7 +177,10 @@ namespace AgeOfEnlightenment.Spellcasting
         //This is so that if I want certain parts of a spell to spawn more objects or anything, I have a way to have them affect the other's without passing an actual reference
         //An action can spawn something tagged as "Target" and then if other steps need to change or destroy it they just need to ask for "Target"
         [ShowIf("taggedItemType")] [SerializeField] string _runtimeObjectKey = "Preview";
-        [ShowIf("gameObjectType")] [SerializeField] GameObject _objectPrefab;
+        [ShowIf("gameObjectType")] [AssetsOnly] [SerializeField] GameObject _objectPrefab;
+        [ShowIf("gameObjectType")] [SerializeField] bool _childOfSpawnpoint;
+        [ShowIf("gameObjectType")][SerializeField] float _spawnSize = 1; 
+        [ShowIf("gameObjectType")][SerializeField] int _spawnLayer;
 
 
 
@@ -145,8 +188,16 @@ namespace AgeOfEnlightenment.Spellcasting
         [ShowIf("projectileType")] [SerializeField] SpellShootDirection _shootDirection;
         [ShowIf("projectileType")] [SerializeField] float _projectileSpeed = 5f;
         [ShowIf("projectileType")] [SerializeField] float _projectileLifetime = 10f;
+        [ShowIf("projectileType")] [SerializeField] bool _targetedProjectile;
+        [ShowIf("_targetedProjectile")] [SerializeField] TargetingSettings _targetSettings;
+
+        [ListViewSettings(ShowFoldoutHeader = false, ShowBoundCollectionSize = false)]
+        [Header("Projectile Modifiers")]
+        [ShowIf("projectileType")][SerializeReference] List<SpellProjectileBehaviourModifier> _projectileModifiers = new();
 
         [ListViewSettings (ShowFoldoutHeader = false, ShowBoundCollectionSize = false)]
+        [Space(5f)]
+        [Header("Projectile Callbacks")]
         [ShowIf("projectileType")] [SerializeReference] List<SpellProjectileCallbackAction> _projectileCallbacks = new();
 
         [Header("Audio Settings")]
@@ -154,12 +205,22 @@ namespace AgeOfEnlightenment.Spellcasting
         [ShowIf("audioType")] [SerializeField] float _volume;
 
 
+        
         public RouteActionType Type => _type;
         public string RuntimeObjectKey => _runtimeObjectKey;
+        public bool ChildOfSpawnpoint => _childOfSpawnpoint;
+        public float SpawnSize => _spawnSize;
+        public int SpawnLayer => _spawnLayer;
+
         public GameObject Prefab => _objectPrefab;
         public SpellShootDirection ShootDirection => _shootDirection;
         public float ProjectileSpeed => _projectileSpeed;
         public float ProjectileLifetime => _projectileLifetime;
+        public bool TargetedProjectile => _targetedProjectile;
+        public TargetingSettings TargetSettings => _targetSettings;
+
+
+        public List<SpellProjectileBehaviourModifier> ProjectileModifiers => _projectileModifiers;
         public List<SpellProjectileCallbackAction> ProjectileCallbacks => _projectileCallbacks;
 
 
@@ -169,15 +230,12 @@ namespace AgeOfEnlightenment.Spellcasting
 
         public bool IsValid()
         {
-            if (string.IsNullOrWhiteSpace(_runtimeObjectKey)) return false;
-            if (_type == RouteActionType.SpawnPreviewAtCastOrigin && _objectPrefab == null) return false;
-            if (_type == RouteActionType.SpawnProjectileAtOrigin && _objectPrefab == null) return false;
+            if (_type == RouteActionType.SpawnObjectAtCastOrigin && _objectPrefab == null) return false;
             if (_type == RouteActionType.LaunchProjectile && _projectileSpeed <= 0f) return false;
             if (_type == RouteActionType.LaunchProjectile && _projectileLifetime <= 0f) return false;
 
             return true;
         }
-
         //This method is called whenever the Type variable is changed, and it sets the name variable to what we want it to be so that it shows in the list
         void ChangeNameStringForOrganization(RouteActionType _newType)
         {
@@ -198,6 +256,7 @@ namespace AgeOfEnlightenment.Spellcasting
         //ALSO we can designate actions that happen when the RouteStep starts and when it finishes, that way we can play audio or spawn necessary objects as needed for the spells
         [Header("Identity")]
         [SerializeField] string _name;
+        [SerializeField] float _cooldown;
 
         [Header("Entry Triggers")]
         [SerializeField] private RouteEventType _eventType;
@@ -240,6 +299,7 @@ namespace AgeOfEnlightenment.Spellcasting
 
 
         public string Name => _name;
+        public float Cooldown => _cooldown;
         public RouteEventType EventType => _eventType;
         public GestureSpec Gesture => _gesture;
         public float RequiredChargeSeconds => _requiredCharge;

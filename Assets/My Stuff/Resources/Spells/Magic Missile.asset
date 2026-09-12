@@ -15,65 +15,71 @@ MonoBehaviour:
   _ActivationRoutes:
   - _name: Basic Cast
     _firstStep:
-      _name: Trigger Press
-      _eventType: 0
+      _name: Cooldown
+      _cooldown: 0.75
+      _eventType: 2
       _button: 0
       _gesture:
-        _gestureType: 0
-        _direction: 0
+        _gestureType: 4
+        _direction: 4
         _velocitySpace: 0
         _overrideMinimumSpeed: 0
         _minimumSpeed: 0
-      _requiredCharge: 0
-      RequiredButtonsToBeHeld: 
+      _requiredCharge: 0.05
+      RequiredButtonsToBeHeld: 00000000
       _timeoutSeconds: 0
       _onStartedActions:
       - name: SpawnProjectileAtOrigin
         _type: 6
         _runtimeObjectKey: projectile
-        _objectPrefab: {fileID: 2196924460264218457, guid: f5e52099def87a74db82186f683f5918,
+        _objectPrefab: {fileID: 1120250531953485468, guid: d73e5f2649dfd2940a7c14dd08edd912,
           type: 3}
+        _childOfSpawnpoint: 0
+        _spawnSize: 1
+        _spawnLayer: 8
         _shootDirection: 0
         _projectileSpeed: 0
         _projectileLifetime: 0
         _projectileCallbacks: []
         _audioClip: {fileID: 0}
         _volume: 0
-      _onCompletionActions: []
-      _finalStep: 0
-      _nextSteps:
-      - _name: Trigger Release
-        _eventType: 1
-        _button: 0
-        _gesture:
-          _gestureType: 0
-          _direction: 0
-          _velocitySpace: 0
-          _overrideMinimumSpeed: 0
-          _minimumSpeed: 0
-        _requiredCharge: 0
-        RequiredButtonsToBeHeld: 
-        _timeoutSeconds: 0
-        _onStartedActions: []
-        _onCompletionActions:
-        - name: LaunchProjectile
-          _type: 7
-          _runtimeObjectKey: projectile
-          _objectPrefab: {fileID: 0}
-          _shootDirection: 2
-          _projectileSpeed: 5
-          _projectileLifetime: 3
-          _projectileCallbacks:
-          - rid: 2330997725644718153
-          _audioClip: {fileID: 0}
-          _volume: 0
-        _finalStep: 1
-        _nextSteps: []
+      - name: SpawnObjectAtCastOrigin
+        _type: 2
+        _runtimeObjectKey: 
+        _objectPrefab: {fileID: 7848842863859681960, guid: efd7dcac1f9cc4c45b208ad61b073cdb,
+          type: 3}
+        _childOfSpawnpoint: 0
+        _spawnSize: 0.1
+        _spawnLayer: 0
+        _shootDirection: 0
+        _projectileSpeed: 0
+        _projectileLifetime: 0
+        _projectileCallbacks: []
+        _audioClip: {fileID: 0}
+        _volume: 0
+      _onCompletionActions:
+      - name: LaunchProjectile
+        _type: 7
+        _runtimeObjectKey: projectile
+        _objectPrefab: {fileID: 0}
+        _childOfSpawnpoint: 0
+        _spawnSize: 0
+        _spawnLayer: 0
+        _shootDirection: 7
+        _projectileSpeed: 10
+        _projectileLifetime: 3
+        _projectileCallbacks:
+        - rid: 2330997910308126786
+        _audioClip: {fileID: 0}
+        _volume: 0
+      _finalStep: 1
+      _nextSteps: []
   references:
     version: 2
     RefIds:
-    - rid: 2330997725644718153
-      type: {class: SpellProjectile_DebugInfo, ns: AgeOfEnlightenment.Spellcasting,
+    - rid: 2330997910308126786
+      type: {class: SpellProjectile_DealDamage, ns: AgeOfEnlightenment.Spellcasting,
         asm: Assembly-CSharp}
       data:
-        _callbackType: 2
+        _callbackType: 0
+        Damage: 5
