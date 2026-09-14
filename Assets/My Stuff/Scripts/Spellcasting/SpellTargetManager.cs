@@ -64,6 +64,9 @@ namespace AgeOfEnlightenment.Spellcasting
 			var hitEntities = ConvertHitsToEntity(Physics.SphereCastAll(origin.position, settings.CastSize, direction, settings.CastDistance, ~settings.IgnoredLayers));
 
 
+			if (hitEntities.Count == 0)
+				return null;
+
 			if(settings.Selection == TargetSelection.Closest || settings.Selection == TargetSelection.Furthest)
 			{
 				//If we need to worry about the distance to the entities we sort them by distance to the source

@@ -66,4 +66,46 @@ public class SoundManagerSO : ScriptableObject
         Destroy(audioSource.gameObject, clipLength);
 
     }
+
+    public static GameObject PlayLoopingClipAtPoint(AudioClip clip, Vector3 worldPos, float volume, float pitchChangeModifier = 0, float volumeChangeModifier = 0)
+    {
+        float randVolume = Random.Range(volume - volumeChangeModifier, volume + volumeChangeModifier);
+        float randPitch = Random.Range(1 - pitchChangeModifier, 1 + pitchChangeModifier);
+        //Spawn object
+        AudioSource audioSource = Instantiate(Instance.AudioSourcePrefab, worldPos, Quaternion.identity);
+
+        //Give it the clip
+        audioSource.clip = clip;
+
+        //volume
+        audioSource.volume = randVolume;
+        audioSource.pitch = randPitch;
+
+        audioSource.loop = true;
+
+        audioSource.Play();
+
+        return audioSource.gameObject;
+    }
+
+    public static GameObject PlayLoopingClipAsChild(AudioClip clip, Transform parent, float volume, float pitchChangeModifier = 0, float volumeChangeModifier = 0)
+    {
+        float randVolume = Random.Range(volume - volumeChangeModifier, volume + volumeChangeModifier);
+        float randPitch = Random.Range(1 - pitchChangeModifier, 1 + pitchChangeModifier);
+        //Spawn object
+        AudioSource audioSource = Instantiate(Instance.AudioSourcePrefab, parent);
+
+        //Give it the clip
+        audioSource.clip = clip;
+
+        //volume
+        audioSource.volume = randVolume;
+        audioSource.pitch = randPitch;
+
+        audioSource.loop = true;
+
+        audioSource.Play();
+
+        return audioSource.gameObject;
+    }
 }

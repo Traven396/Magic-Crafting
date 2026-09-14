@@ -45,4 +45,5 @@ public class Entity : MonoBehaviour, IDamageable
             Debug.Log("Ouch! We just took " + damageAmount + " damage!");
         }
     }
+
 }

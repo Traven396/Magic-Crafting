@@ -18,7 +18,6 @@ namespace AgeOfEnlightenment.Spellcasting
 
         [SerializeField] Transform _castOriginPoint;
         //This is temporary. In the future this will be a parent class of anything gesture.
-        [SerializeField] WandGestureInput GestureInput;
         private SpellSequenceTracker _sequenceTracker;
         private SpellcastingSession _latestSession;
 
@@ -118,7 +117,7 @@ namespace AgeOfEnlightenment.Spellcasting
                 return;
             }
 
-            _sequenceTracker = new SpellSequenceTracker(_activeSpell, _castOriginPoint, GestureInput.GetTracker());
+            _sequenceTracker = new SpellSequenceTracker(_activeSpell, _castOriginPoint, _gestureInput.GetTracker());
             _sequenceTracker.FinalStepReached += BeginCastingSession;
 
             if (_gestureInput != null) _gestureInput.SetGestureSpecifications(_activeSpell.GetGestureSpecifications());

@@ -177,8 +177,9 @@ namespace AgeOfEnlightenment.Spellcasting
 
             if (step.FinalStep)
             {
-                _currentAttempt.EnterFinalStep(step, currentTime);
                 FinalStepReached?.Invoke(_currentAttempt, step);
+
+                _currentAttempt.EnterFinalStep(step, currentTime);
 
                 _currentAttempt = null;
 
@@ -221,14 +222,13 @@ namespace AgeOfEnlightenment.Spellcasting
         {
             Route = route;
             ActionContext = new SpellActionContext(castOrigin, tracker);
-
-            
         }
 
         public void EnterNonTerminalStep(RouteStep step, float currentTime)
         {
             //Now this might seem backwards, but what we are doing is finishing the OLD step, and then starting the new one we are moving to.
-            SpellRouteActionExecutor.ExecuteActions(step.OnStepCompletedActions, ActionContext);
+            if(CurrentStep != null)
+                SpellRouteActionExecutor.ExecuteActions(CurrentStep.OnStepCompletedActions, ActionContext);
 
             CurrentStep = step;
             TimeCurrentStepEnteredAt = currentTime;
@@ -241,11 +241,15 @@ namespace AgeOfEnlightenment.Spellcasting
         }
         public void EnterFinalStep(RouteStep step, float currentTime)
         {
-            
+            if (CurrentStep != null)
+                SpellRouteActionExecutor.ExecuteActions(CurrentStep.OnStepCompletedActions, ActionContext);
+
             CurrentStep = step;
             TimeCurrentStepEnteredAt = currentTime;
 
             SpellRouteActionExecutor.ExecuteActions(step.OnStepStartActions, ActionContext);
+
+            SpellRouteActionExecutor.ExecuteActions(step.OnStepCompletedActions, ActionContext);
         }
 
         public bool HasTimedOut(float currentTime)

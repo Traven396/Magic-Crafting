@@ -1,14 +1,12 @@
 namespace AgeOfEnlightenment.Spellcasting
 {
     using Alchemy.Inspector;
+    using DG.Tweening;
     using FoxheadDev.GestureDetection;
-    using NUnit.Framework;
     using System;
     using System.Collections.Generic;
     using System.Xml.Linq;
     using UnityEngine;
-    using static UnityEditor.Searcher.Searcher.AnalyticsEvent;
-    using static UnityEngine.InputManagerEntry;
 
 
     public enum SpellButton { Primary, Secondary, Tertiary }
@@ -20,14 +18,17 @@ namespace AgeOfEnlightenment.Spellcasting
         ChargeTimeReached
     }
 
-    public enum RouteActionType
+    public enum RouteStepActionType
     {
         None,
         Custom,
         SpawnObjectAtCastOrigin,
         DestroyObjects,
         PlayAudio,
-        LaunchProjectile
+        LaunchProjectile,
+        LogMessage,
+        TweenObject,
+        LaunchProjectileBurst
     }
     public enum SpellShootDirection { Left, Right, Up, Down, Forward, Back, PlayerDirection, PlayerDirectionWithCastVelocity }
     //This is a way for in the inspector for me to designate what kind of gesture I want to have the player perform.
@@ -149,11 +150,54 @@ namespace AgeOfEnlightenment.Spellcasting
         [ShowIf("distanceType")] public float CastDistance;
         [ShowIf("sizedType")] public float CastSize;
 
-    } 
+    }
+    #endregion
+
+
+    #region Tweening
+
+    public enum RouteTweenValue
+    {
+        Scale,
+        Local_Position,
+        World_Position,
+        Rotation
+    }
+    public enum RouteTweenAction
+    {
+        Add, //Increase the value by this amount
+        Subtract, //Lower the value by the amount
+        To, //Change directly to this value no matter the starting value
+        From, //Change from this value back to start
+        Punch, //Punch the object, causing it to spring back and forth
+        Shake //Shakes the object, causing random changes to the value
+    }
+
+    [Serializable]
+    public struct RouteTweenSettings
+    {
+        public string TweenKey;
+        public string TargetObjectKey;
+        [Space(10)]
+        public RouteTweenValue Value;
+        public RouteTweenAction Action;
+        [Space(10)]
+        public bool SeperateAxis;
+
+        [HideIf("SeperateAxis")] public float ChangeValue;
+        [ShowIf("SeperateAxis")] public Vector3 ChangeVector;
+
+        [Space(10)]
+        public float Duration;
+        public bool Loop;
+        [ShowIf("Loop")] public LoopType LoopType;
+    }
+
+
     #endregion
 
     [Serializable]
-    public class RouteAction
+    public class RouteStepAction
     {
 
         //These are the actions that can happen when a route is reached or finished.
@@ -161,14 +205,16 @@ namespace AgeOfEnlightenment.Spellcasting
         [HideInInspector] public string name = "";
         
         [OnValueChanged("ChangeNameStringForOrganization")]
-        [SerializeField] RouteActionType _type;
+        [SerializeField] RouteStepActionType _type;
 
 
-        bool gameObjectType => _type == RouteActionType.SpawnObjectAtCastOrigin || _type == RouteActionType.DestroyObjects;
-        bool taggedItemType => _type == RouteActionType.SpawnObjectAtCastOrigin || _type == RouteActionType.LaunchProjectile || _type == RouteActionType.DestroyObjects;
-        bool projectileType => _type == RouteActionType.LaunchProjectile;
-        bool audioType => _type == RouteActionType.PlayAudio;
-        
+        bool gameObjectType => _type == RouteStepActionType.SpawnObjectAtCastOrigin || _type == RouteStepActionType.LaunchProjectileBurst;
+        bool taggedItemType => _type == RouteStepActionType.SpawnObjectAtCastOrigin || _type == RouteStepActionType.LaunchProjectile || _type == RouteStepActionType.DestroyObjects;
+        bool projectileType => _type == RouteStepActionType.LaunchProjectile || _type == RouteStepActionType.LaunchProjectileBurst;
+        bool audioType => _type == RouteStepActionType.PlayAudio;
+        bool debugType => _type == RouteStepActionType.LogMessage;
+        bool tweenType => _type == RouteStepActionType.TweenObject;
+        bool burstType => _type == RouteStepActionType.LaunchProjectileBurst;
         // ^ all of these are variables I need to designate so I can only have parts of the settings appear that are necessary to what the Action is doing. It is merely to just make it look nice
         //very tedious to set up though ngl
         
@@ -179,34 +225,48 @@ namespace AgeOfEnlightenment.Spellcasting
         [ShowIf("taggedItemType")] [SerializeField] string _runtimeObjectKey = "Preview";
         [ShowIf("gameObjectType")] [AssetsOnly] [SerializeField] GameObject _objectPrefab;
         [ShowIf("gameObjectType")] [SerializeField] bool _childOfSpawnpoint;
-        [ShowIf("gameObjectType")][SerializeField] float _spawnSize = 1; 
-        [ShowIf("gameObjectType")][SerializeField] int _spawnLayer;
+        [ShowIf("gameObjectType")] [SerializeField] float _spawnSize = 1; 
+        [ShowIf("gameObjectType")] [SerializeField] int _spawnLayer;
 
-
+        [Header("Tween Settings")]
+        [ShowIf("tweenType")] [SerializeField] RouteTweenSettings _tweenSettings;
 
         [Header("Projectile Settings")]
         [ShowIf("projectileType")] [SerializeField] SpellShootDirection _shootDirection;
         [ShowIf("projectileType")] [SerializeField] float _projectileSpeed = 5f;
         [ShowIf("projectileType")] [SerializeField] float _projectileLifetime = 10f;
+        
         [ShowIf("projectileType")] [SerializeField] bool _targetedProjectile;
         [ShowIf("_targetedProjectile")] [SerializeField] TargetingSettings _targetSettings;
 
+
+
         [ListViewSettings(ShowFoldoutHeader = false, ShowBoundCollectionSize = false)]
         [Header("Projectile Modifiers")]
-        [ShowIf("projectileType")][SerializeReference] List<SpellProjectileBehaviourModifier> _projectileModifiers = new();
+        [ShowIf("projectileType")] [SerializeReference] List<SpellProjectileBehaviourModifier> _projectileModifiers = new();
 
         [ListViewSettings (ShowFoldoutHeader = false, ShowBoundCollectionSize = false)]
         [Space(5f)]
         [Header("Projectile Callbacks")]
         [ShowIf("projectileType")] [SerializeReference] List<SpellProjectileCallbackAction> _projectileCallbacks = new();
 
+        [Header("Burst Settings")]
+        [ShowIf("burstType")] [SerializeField] int _projectileCount;
+        [ShowIf("burstType")] [SerializeField] float _burstSpread;
+
         [Header("Audio Settings")]
         [ShowIf("audioType")] [SerializeField] AudioClip _audioClip;
         [ShowIf("audioType")] [SerializeField] float _volume;
+        [ShowIf("audioType")] [SerializeField] bool _loopAudio;
+        [ShowIf("_loopAudio")] [SerializeField] string _audioRuntimeKey;
+        [Tooltip("The Key for the object the looped audio should follow. If left blank then it will attach to the cast origin")]
+        [ShowIf("_loopAudio")] [SerializeField] string _loopAudioParentKey; 
 
 
+        [Header("Debug Settings")]
+        [ShowIf("debugType")] [SerializeField] string _message;
         
-        public RouteActionType Type => _type;
+        public RouteStepActionType Type => _type;
         public string RuntimeObjectKey => _runtimeObjectKey;
         public bool ChildOfSpawnpoint => _childOfSpawnpoint;
         public float SpawnSize => _spawnSize;
@@ -219,6 +279,8 @@ namespace AgeOfEnlightenment.Spellcasting
         public bool TargetedProjectile => _targetedProjectile;
         public TargetingSettings TargetSettings => _targetSettings;
 
+        public RouteTweenSettings TweenSettings => _tweenSettings;
+
 
         public List<SpellProjectileBehaviourModifier> ProjectileModifiers => _projectileModifiers;
         public List<SpellProjectileCallbackAction> ProjectileCallbacks => _projectileCallbacks;
@@ -228,16 +290,31 @@ namespace AgeOfEnlightenment.Spellcasting
         public float Volume => _volume;
 
 
+        public string Message => _message;
+
+        public int ProjectileCount => _projectileCount;
+        public float BurstSpread => _burstSpread;
+
+        public bool LoopAudio => _loopAudio;
+        public string AudioRuntimeKey => _audioRuntimeKey;
+        public string LoopAudioParentKey => _loopAudioParentKey;
+
         public bool IsValid()
         {
-            if (_type == RouteActionType.SpawnObjectAtCastOrigin && _objectPrefab == null) return false;
-            if (_type == RouteActionType.LaunchProjectile && _projectileSpeed <= 0f) return false;
-            if (_type == RouteActionType.LaunchProjectile && _projectileLifetime <= 0f) return false;
+            if (_type == RouteStepActionType.SpawnObjectAtCastOrigin && _objectPrefab == null) return false;
+            if (_type == RouteStepActionType.LaunchProjectile && _projectileSpeed <= 0f) return false;
+            if (_type == RouteStepActionType.LaunchProjectile && _projectileLifetime <= 0f) return false;
+
+            if(audioType && !_audioClip)
+            {
+                Debug.LogError("No audio clip in step");
+                return false;
+            }
 
             return true;
         }
         //This method is called whenever the Type variable is changed, and it sets the name variable to what we want it to be so that it shows in the list
-        void ChangeNameStringForOrganization(RouteActionType _newType)
+        void ChangeNameStringForOrganization(RouteStepActionType _newType)
         {
             name = _newType.ToString();
         }
@@ -278,10 +355,10 @@ namespace AgeOfEnlightenment.Spellcasting
 
         [Header("Actions")]
         [ListViewSettings(ShowBoundCollectionSize = false)]
-        [SerializeField] List<RouteAction> _onStartedActions;
+        [SerializeField] List<RouteStepAction> _onStartedActions;
 
         [ListViewSettings(ShowBoundCollectionSize = false)]
-        [SerializeField] List<RouteAction> _onCompletionActions;
+        [SerializeField] List<RouteStepAction> _onCompletionActions;
 
 
 
@@ -305,8 +382,8 @@ namespace AgeOfEnlightenment.Spellcasting
         public float RequiredChargeSeconds => _requiredCharge;
         public float TimeoutSeconds => _timeoutSeconds;
         public bool FinalStep => _finalStep;
-        public IReadOnlyList<RouteAction> OnStepStartActions => _onStartedActions;
-        public IReadOnlyList<RouteAction> OnStepCompletedActions => _onCompletionActions;
+        public IReadOnlyList<RouteStepAction> OnStepStartActions => _onStartedActions;
+        public IReadOnlyList<RouteStepAction> OnStepCompletedActions => _onCompletionActions;
         public IReadOnlyList<RouteStep> NextSteps => _nextSteps;
 
 
@@ -334,15 +411,14 @@ namespace AgeOfEnlightenment.Spellcasting
         {
             if (_eventType == RouteEventType.GestureRecognized && (_gesture == null || !_gesture.IsValid())) return false;
             if (_eventType == RouteEventType.ChargeTimeReached && _requiredCharge < 0f) return false;
-            if (_finalStep && _nextSteps.Count > 0) return false;
             if (!_finalStep && _nextSteps.Count == 0) return false;
 
-            foreach (RouteAction action in _onCompletionActions)
+            foreach (RouteStepAction action in _onCompletionActions)
             {
                 if (action == null || !action.IsValid()) return false;
             }
 
-            foreach (RouteAction action in _onStartedActions)
+            foreach (RouteStepAction action in _onStartedActions)
             {
                 if (action == null || !action.IsValid()) return false;
             }

@@ -1,10 +1,12 @@
 namespace AgeOfEnlightenment.Spellcasting
 {
+    using DG.Tweening;
     using FoxheadDev.GestureDetection;
     using System;
     using System.Collections.Generic;
-    using UnityEditor.Timeline.Actions;
+    using System.Linq;
     using UnityEngine;
+    using UnityEngine.InputSystem;
 
     public class SpellcastingSession
     {
@@ -37,7 +39,6 @@ namespace AgeOfEnlightenment.Spellcasting
 
         public void Begin()
         {
-            SpellRouteActionExecutor.ExecuteActions(_lastStepCompleted.OnStepCompletedActions, _actionContext);
             
         }
 
@@ -106,10 +107,11 @@ namespace AgeOfEnlightenment.Spellcasting
     public class SpellActionContext
     {
         private Dictionary<string, GameObject> _runtimeObjects = new();
+        private Dictionary<string, Tweener> _runtimeTweens = new();
 
         public Transform CastOrigin { get; private set; }
         public PhysicsTracker CasterPhysicsTracker { get; private set; }
-        public SpellcastingSession AssociatedCastingSession { get; private set; }
+        public SpellcastingSession ParentSession { get; private set; }
 
         public SpellActionContext(Transform castOrigin, PhysicsTracker tracker)
         {
@@ -119,7 +121,7 @@ namespace AgeOfEnlightenment.Spellcasting
 
         public void AttachCastingSession(SpellcastingSession castingSession)
         {
-            AssociatedCastingSession = castingSession;
+            ParentSession = castingSession;
         }
 
         public void SetRuntimeObject(string key, GameObject runtimeObject)
@@ -139,22 +141,66 @@ namespace AgeOfEnlightenment.Spellcasting
 
         public void DestroyRuntimeObject(string key)
         {
-            if (!_runtimeObjects.TryGetValue(key, out GameObject runtimeObject)) return;
+            if (!TryGetRuntimeObject(key, out GameObject runtimeObject)) return;
 
-            if (runtimeObject != null) UnityEngine.Object.Destroy(runtimeObject);
+            if (runtimeObject != null) 
+            {
+                DestroyRuntimeTweensFromObject(runtimeObject);
+                UnityEngine.Object.Destroy(runtimeObject);
+            }
 
             _runtimeObjects.Remove(key);
         }
 
         public void DestroyAllRuntimeObjects()
         {
-            Debug.Log("We just cleared our runtime objects");
             foreach (GameObject runtimeObject in _runtimeObjects.Values)
             {
-                if (runtimeObject != null) UnityEngine.Object.Destroy(runtimeObject);
+                if (runtimeObject != null) 
+                {
+                    DestroyRuntimeTweensFromObject(runtimeObject);
+                    UnityEngine.Object.Destroy(runtimeObject);
+                }
             }
 
             _runtimeObjects.Clear();
+        }
+    
+    
+        public void SetRuntimeTween(string key, Tweener tween)
+        {
+            if (!String.IsNullOrEmpty(key))
+            {
+                DestroyRuntimeTween(key);
+
+                _runtimeTweens[key] = tween;
+            }
+        }
+        public bool TryGetRuntimeTween(string key, out Tweener tween)
+        {
+            return _runtimeTweens.TryGetValue(key, out tween);
+        }
+        void DestroyRuntimeTweensFromObject(GameObject runtimeObject)
+        {
+            var tweens = _runtimeTweens.Where(tw => tw.Value.target as Transform == runtimeObject.transform).ToList();
+
+            foreach (var tween in tweens)
+            {
+                tween.Value.Kill();
+                _runtimeTweens.Remove(tween.Key);
+            }
+
+        }
+        public void DestroyRuntimeTween(string key)
+        {
+            if (!TryGetRuntimeTween(key, out Tweener runtimeTween)) return;
+
+            if (runtimeTween != null)
+            {
+                runtimeTween.Kill();
+            }
+
+            _runtimeTweens.Remove(key);
         }
     }
 }

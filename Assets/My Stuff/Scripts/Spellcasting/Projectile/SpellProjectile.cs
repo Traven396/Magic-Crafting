@@ -2,10 +2,12 @@ namespace AgeOfEnlightenment.Spellcasting
 {
     using NUnit.Framework;
     using System.Collections.Generic;
+    using System.Linq;
     using UnityEngine;
 
     public class SpellProjectile : MonoBehaviour
     {
+        [SerializeField] Transform TrailParent;
         SpellcastingSession _ownerSession;
         bool _hasResolved;
 
@@ -23,9 +25,19 @@ namespace AgeOfEnlightenment.Spellcasting
         public float Speed => _speed;
         public Rigidbody Rigidbody => _rigidbody;
 
+
+        float longestTrail;
+
         private void Awake()
         {
             GetComponent<Collider>().enabled = false;
+
+            if (TrailParent)
+            {
+                var childTrails = TrailParent.GetComponentsInChildren<TrailRenderer>();
+
+                longestTrail = childTrails.Max(tr => tr.time);
+            }
         }
 
         public void ActivateAndLaunch(SpellcastingSession session, Vector3 shootDirection, float speed, float lifeTime, List<SpellProjectileBehaviourModifier> modifiers, Entity target = null)
@@ -36,7 +48,7 @@ namespace AgeOfEnlightenment.Spellcasting
 
             transform.parent = null;
 
-            _modifiers = modifiers;
+            _modifiers = new(modifiers);
 
             if(!_rigidbody) _rigidbody = GetComponent<Rigidbody>();
 
@@ -50,7 +62,7 @@ namespace AgeOfEnlightenment.Spellcasting
 
             _rigidbody.linearVelocity = shootDirection.normalized * speed;
 
-            Destroy(gameObject, lifeTime);
+            Invoke(nameof(DestroyProjectile), lifeTime);
 
             GetComponent<Collider>().enabled = true;
 
@@ -71,6 +83,14 @@ namespace AgeOfEnlightenment.Spellcasting
             _modifiers.ForEach(mod => mod.LateTick(this, Time.deltaTime));
         }
 
+        void DestroyProjectile()
+        {
+            TrailParent.parent = null;
+
+            Destroy(TrailParent.gameObject, longestTrail);
+
+            Destroy(gameObject);
+        }
 
         private void OnCollisionEnter(Collision collision)
         {
@@ -80,7 +100,7 @@ namespace AgeOfEnlightenment.Spellcasting
             _hasResolved = true;
             _ownerSession.Notify_ProjectileHit(this, collision);
 
-            Destroy(gameObject);
+            DestroyProjectile();
         }
 
         private void OnDestroy()

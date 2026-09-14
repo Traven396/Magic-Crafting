@@ -42,6 +42,9 @@ namespace AgeOfEnlightenment.Spellcasting
         //}
         public PhysicsTracker GetTracker()
         {
+            if (_physicsTracker == null)
+                EnsurePhysicsTracker();
+
             return _physicsTracker;
         }
         void DebugGesture(GestureSpec spec)

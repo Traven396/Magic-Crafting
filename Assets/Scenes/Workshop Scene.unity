@@ -9861,6 +9861,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 792fa88c4f141e748b1e87c62eaa1f13,
         type: 2}
+    - target: {fileID: 7019474812289503928, guid: 01e0d73f667c50a4a8fdd4d252c5f06d,
+        type: 3}
+      propertyPath: _activeSpell
+      value: 
+      objectReference: {fileID: 11400000, guid: 792fa88c4f141e748b1e87c62eaa1f13,
+        type: 2}
     - target: {fileID: 7675883849222138199, guid: 01e0d73f667c50a4a8fdd4d252c5f06d,
         type: 3}
       propertyPath: m_LocalPosition.x

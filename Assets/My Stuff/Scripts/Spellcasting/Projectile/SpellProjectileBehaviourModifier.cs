@@ -28,7 +28,7 @@ namespace AgeOfEnlightenment.Spellcasting
         {
             if (projectile.CurrentTarget)
             {
-                Vector3 direction = (projectile.CurrentTarget.transform.TransformPoint(projectile.CurrentTarget.Rigidbody.centerOfMass) - projectile.Rigidbody.position).normalized;
+                Vector3 direction = (projectile.CurrentTarget.Rigidbody.worldCenterOfMass - projectile.Rigidbody.position).normalized;
 
                 Quaternion targetRotation = Quaternion.LookRotation(direction);
 
@@ -49,6 +49,28 @@ namespace AgeOfEnlightenment.Spellcasting
         public override void Launch(SpellProjectile projectile)
         {
             projectile.transform.forward = projectile.Rigidbody.linearVelocity.normalized;
+        }
+
+        public override void Tick(SpellProjectile projectile, float deltaTime)
+        {
+        }
+        public override void LateTick(SpellProjectile projectile, float deltaTime)
+        {
+        }
+    }
+    [Serializable]
+    public class PlayAudioOnSpawn : SpellProjectileBehaviourModifier
+    {
+        [SerializeField] AudioClip clip;
+        [SerializeField] float volume;
+        [SerializeField] float volumeModifier;
+        [SerializeField] float pitchModifier;
+        public override void Launch(SpellProjectile projectile)
+        {
+            if (clip)
+            {
+                SoundManagerSO.PlayClipAtPoint(clip, projectile.transform.position, volume, pitchModifier, volumeModifier);
+            }
         }
 
         public override void Tick(SpellProjectile projectile, float deltaTime)
