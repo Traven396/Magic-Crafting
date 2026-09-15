@@ -657,6 +657,21 @@ namespace FoxheadDev.GestureDetection
                     gesture = () => tracker.SelfSpaceAngularVelocity.x >= minVelocity &&
                     tracker.SelfSpaceAngularVelocity.MostlyX();
                     break;
+                //An X-Axis flick is one that can be used in either direction around the X-Axis. So this would be an Up or Down flick essentially.
+                case GestureDirection.X_Axis:
+                    gesture = () => tracker.SelfSpaceAngularVelocity.x.Abs() >= minVelocity &&
+                    tracker.SelfSpaceAngularVelocity.MostlyX();
+                    break;
+                //A Y-Axis flick is flicking to either side of your hand. Like making a P.U. gesture
+                case GestureDirection.Y_Axis:
+                    gesture = () => tracker.SelfSpaceAngularVelocity.y.Abs() >= minVelocity &&
+                    tracker.SelfSpaceAngularVelocity.MostlyY();
+                    break;
+                //A Z-Axis flick is one that should be used sparingly. Its rotating your hand quickly as if twisting something.
+                case GestureDirection.Z_Axis:
+                    gesture = () => tracker.SelfSpaceAngularVelocity.z.Abs() >= minVelocity &&
+                    tracker.SelfSpaceAngularVelocity.MostlyZ();
+                    break;
                 default:
                     throw new ArgumentException("We cannot do a flick in the other directions yet. Gotta figure those numbers out bud");
             }
@@ -687,13 +702,66 @@ namespace FoxheadDev.GestureDetection
 
         //    return Tuple.Create($"Palm Point Up", gesture != null ? new[] { gesture } : new Func<bool>[] { });
         //}
+
+        /// <summary>
+        /// Requires the object to make a motion in the view direction (player's perspective) regardless of it's personal orientation.
+        /// </summary>
+        /// <param name="tracker">The hand to check</param>
+        /// <param name="direction">The direction you are moving from the Player's perspective</param>
+        /// <param name="velocity">An optional velocity requirement to pass and overwrite the base velocity.</param>
+        /// <returns></returns>
+        public static NamedCondition ViewSpaceMotion(PhysicsTracker tracker, GestureDirection direction, float? velocity = null)
+        {
+            float minVelocity = velocity ?? SmallGestureSpeed;
+            Func<bool> gesture = null;
+
+            switch (direction)
+            {
+                case GestureDirection.Left:
+                    gesture = () =>tracker.ViewSpaceVelocity.x <= -minVelocity &&
+                    tracker.ViewSpaceVelocity.MostlyX();
+                    break;
+                case GestureDirection.Right:
+                    gesture = () => tracker.ViewSpaceVelocity.x >= minVelocity &&
+                    tracker.ViewSpaceVelocity.MostlyX();
+                    break;
+                case GestureDirection.Up:
+                    gesture = () => tracker.ViewSpaceVelocity.y >= minVelocity &&
+                    tracker.ViewSpaceVelocity.MostlyY();
+                    break;
+                case GestureDirection.Down:
+                    gesture = () => tracker.ViewSpaceVelocity.y <= -minVelocity &&
+                    tracker.ViewSpaceVelocity.MostlyY();
+                    break;
+                case GestureDirection.Forward:
+                    gesture = () => tracker.ViewSpaceVelocity.z >= minVelocity &&
+                    tracker.ViewSpaceVelocity.MostlyZ() &&
+                    tracker.AccelerationStrength >= 0;
+                    break;
+                case GestureDirection.Back:
+                    gesture = () => tracker.ViewSpaceVelocity.z <= -minVelocity &&
+                    tracker.ViewSpaceVelocity.MostlyZ();
+                    break;
+                case GestureDirection.InwardHoriz:
+                    gesture = () => tracker.ViewSpaceVelocity.x <= -minVelocity &&
+                    tracker.ViewSpaceVelocity.MostlyX();
+                    break;
+                case GestureDirection.OutwardHoriz:
+                    gesture = () => tracker.ViewSpaceVelocity.x >= minVelocity &&
+                    tracker.ViewSpaceVelocity.MostlyX();
+                    break;
+            }
+
+            return Tuple.Create($"ViewSpace Movement {direction}", gesture);
+        }
     }
     public enum GestureType
     {
         Punch,
         Slash,
         Push,
-        Flick
+        Flick,
+        Orientless
     }
     public enum GestureVelocitySpace
     {
@@ -711,7 +779,10 @@ namespace FoxheadDev.GestureDetection
         Forward,
         Back,
         InwardHoriz,
-        OutwardHoriz
+        OutwardHoriz,
+        X_Axis,
+        Y_Axis,
+        Z_Axis
     }
     public enum FlickDirection
     {

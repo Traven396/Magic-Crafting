@@ -2,8 +2,6 @@ namespace AgeOfEnlightenment.Spellcasting
 {
     using Alchemy.Inspector;
     using System.Collections.Generic;
-    using System.Reflection;
-    using UnityEditor;
     using UnityEngine;
 
     [CreateAssetMenu(menuName = "Spells/Base Spell", fileName = "New Spell")]

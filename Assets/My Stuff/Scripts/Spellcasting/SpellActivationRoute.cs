@@ -6,8 +6,7 @@ namespace AgeOfEnlightenment.Spellcasting
     using System.Collections.Generic;
     using UnityEngine;
 
-    public enum RouteButtonState { Pressed, Hold, Released, Any }
-    public enum SpellShootDirection { Left, Right, Up, Down, Forward, Back }
+    
     [Serializable]
 	public class SpellActivationRoute
 	{
@@ -28,6 +27,7 @@ namespace AgeOfEnlightenment.Spellcasting
             return _firstStep.IsValid();
         }
 
+        //Cycles through all of the children route steps and adds their possible gestures to the output list
         public void GatherPossibleGestures(List<GestureSpec> output)
         {
             if (_firstStep != null) _firstStep.GatherPossibleGestures(output);

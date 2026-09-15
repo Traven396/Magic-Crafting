@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3413424784661133174}
   - component: {fileID: 628846469606884284}
   - component: {fileID: 1237625528069141737}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Basic_wand_core
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -123,7 +123,7 @@ GameObject:
   - component: {fileID: 7117185379940471319}
   - component: {fileID: 7396777387359564412}
   - component: {fileID: 6353273292491069789}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Basic Wood - Proto Wand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -347,7 +347,7 @@ GameObject:
   - component: {fileID: 1411151639716218706}
   - component: {fileID: 3960196334195129842}
   - component: {fileID: 6283030861435989748}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Frame Socket
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -465,7 +465,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 314621811908450124}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Core VIsuals
   m_TagString: Untagged
   m_Icon: {fileID: 0}

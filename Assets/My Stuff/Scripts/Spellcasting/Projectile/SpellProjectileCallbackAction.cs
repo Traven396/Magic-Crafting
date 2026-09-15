@@ -1,5 +1,6 @@
 namespace AgeOfEnlightenment.Spellcasting
 {
+    using Alchemy.Inspector;
     using System;
     using UnityEngine;
 
@@ -18,10 +19,19 @@ namespace AgeOfEnlightenment.Spellcasting
     [Serializable]
     public class SpellProjectile_SpawnObject : SpellProjectileCallbackAction
     {
-        [SerializeField] GameObject Prefab;
+        bool impactType => _callbackType != ProjectileCallbackType.Expire;
+
+        [SerializeField] [AssetsOnly] GameObject Prefab;
+        [SerializeField] float Size = 1;
+        [ShowIf("impactType")][SerializeField] bool AlignToNormal;
         public override void ProjectileCollide(SpellProjectile projectile, Collision collision)
         {
-            GameObject.Instantiate(Prefab, collision.GetContact(0).point, Quaternion.identity);
+            var spawned = GameObject.Instantiate(Prefab, collision.GetContact(0).point, Quaternion.identity);
+
+            spawned.transform.localScale = Vector3.one * Size;
+
+            if (AlignToNormal)
+                spawned.transform.forward = collision.GetContact(0).normal;
         }
 
         public override void ProjectileExpire(SpellProjectile projectile)
@@ -63,14 +73,18 @@ namespace AgeOfEnlightenment.Spellcasting
     [Serializable]
     public class SpellProjectile_DealDamage : SpellProjectileCallbackAction
     {
+        [SerializeField] int Damage;
         public override void ProjectileCollide(SpellProjectile projectile, Collision collision)
         {
-            throw new NotImplementedException();
+            if(collision.transform.TryGetComponent(out IDamageable targetDamageable))
+            {
+                targetDamageable.ApplyDamage(Damage);
+            }
         }
 
         public override void ProjectileExpire(SpellProjectile projectile)
         {
-            throw new NotImplementedException();
+            Debug.LogError("What am I supposed to deal damage to? Expire callback doesn't work");
         }
     }
     [Serializable]

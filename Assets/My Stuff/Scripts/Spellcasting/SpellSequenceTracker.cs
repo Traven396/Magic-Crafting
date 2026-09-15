@@ -1,5 +1,6 @@
 namespace AgeOfEnlightenment.Spellcasting
 {
+    using FoxheadDev.GestureDetection;
     using System;
     using System.Collections.Generic;
     using UnityEngine;
@@ -14,11 +15,11 @@ namespace AgeOfEnlightenment.Spellcasting
     {
         SpellDefinitionSO _spellDefinition;
         Transform _castOrigin;
-
+        PhysicsTracker _casterPhysicsTracker;
 
         HashSet<SpellButton> _heldButtons = new();
 
-
+        float currentStepCooldown;
         SpellActivationAttempt _currentAttempt;
         public bool HasActiveAttempt => _currentAttempt != null;
 
@@ -26,30 +27,33 @@ namespace AgeOfEnlightenment.Spellcasting
         public event Action<SpellActivationAttempt, RouteStep> FinalStepReached;
         public event Action<SpellActivationAttempt> AttemptCancelled;
 
-        public SpellSequenceTracker(SpellDefinitionSO spellDefinition, Transform castOrigin)
+        public SpellSequenceTracker(SpellDefinitionSO spellDefinition, Transform castOrigin, PhysicsTracker casterTracker)
         {
             _spellDefinition = spellDefinition;
-            Debug.Log("we received " + castOrigin);
             _castOrigin = castOrigin;
+            _casterPhysicsTracker = casterTracker;
         }
 
         public void ButtonPressed(SpellButton button, float currentTime)
         {
             _heldButtons.Add(button);
 
-            ProcessEvent(RouteEvent.ButtonPressed(button), currentTime);
+            if (currentStepCooldown <= 0)
+                ProcessEvent(RouteEvent.ButtonPressed(button), currentTime);
         }
 
         public void ButtonReleased(SpellButton button, float currentTime)
         {
             _heldButtons.Remove(button);
 
-            ProcessEvent(RouteEvent.ButtonReleased(button), currentTime);
+            if (currentStepCooldown <= 0)
+                ProcessEvent(RouteEvent.ButtonReleased(button), currentTime);
         }
 
         public void GestureRecognized(GestureSpec gesture, float currentTime)
         {
-            ProcessEvent(RouteEvent.GestureRecognized(gesture), currentTime);
+            if(currentStepCooldown <= 0)
+                ProcessEvent(RouteEvent.GestureRecognized(gesture), currentTime);
         }
 
         private void ProcessEvent(RouteEvent routeEvent, float currentTime)
@@ -73,6 +77,9 @@ namespace AgeOfEnlightenment.Spellcasting
 
         public void Tick(float currentTime)
         {
+            if(currentStepCooldown > 0)
+                currentStepCooldown -= Time.deltaTime;
+
             if (_currentAttempt == null) return;
             if (_currentAttempt.HasTimedOut(currentTime))
             {
@@ -112,7 +119,7 @@ namespace AgeOfEnlightenment.Spellcasting
 
 
             
-            _currentAttempt = new SpellActivationAttempt(matchingRoute, _castOrigin);
+            _currentAttempt = new SpellActivationAttempt(matchingRoute, _castOrigin, _casterPhysicsTracker);
 
             AdvanceToStep(matchingRoute.FirstStep, currentTime);
         }
@@ -166,11 +173,13 @@ namespace AgeOfEnlightenment.Spellcasting
         //This method is the one that moves to the next step in the tree.
         private void AdvanceToStep(RouteStep step, float currentTime)
         {
+            currentStepCooldown = step.Cooldown;
+
             if (step.FinalStep)
             {
+                FinalStepReached?.Invoke(_currentAttempt, step);
 
                 _currentAttempt.EnterFinalStep(step, currentTime);
-                FinalStepReached?.Invoke(_currentAttempt, step);
 
                 _currentAttempt = null;
 
@@ -183,7 +192,7 @@ namespace AgeOfEnlightenment.Spellcasting
         }
 
 
-        private void CancelCurrentAttempt()
+        public void CancelCurrentAttempt()
         {
             if (_currentAttempt == null) return;
 
@@ -209,18 +218,17 @@ namespace AgeOfEnlightenment.Spellcasting
         public float TimeCurrentStepEnteredAt { get; private set; }
         public SpellActionContext ActionContext { get; }
 
-        public SpellActivationAttempt(SpellActivationRoute route, Transform castOrigin)
+        public SpellActivationAttempt(SpellActivationRoute route, Transform castOrigin, PhysicsTracker tracker)
         {
             Route = route;
-            ActionContext = new SpellActionContext(castOrigin);
-
-            
+            ActionContext = new SpellActionContext(castOrigin, tracker);
         }
 
         public void EnterNonTerminalStep(RouteStep step, float currentTime)
         {
             //Now this might seem backwards, but what we are doing is finishing the OLD step, and then starting the new one we are moving to.
-            SpellRouteActionExecutor.ExecuteActions(step.OnStepCompletedActions, ActionContext);
+            if(CurrentStep != null)
+                SpellRouteActionExecutor.ExecuteActions(CurrentStep.OnStepCompletedActions, ActionContext);
 
             CurrentStep = step;
             TimeCurrentStepEnteredAt = currentTime;
@@ -233,11 +241,15 @@ namespace AgeOfEnlightenment.Spellcasting
         }
         public void EnterFinalStep(RouteStep step, float currentTime)
         {
-            
+            if (CurrentStep != null)
+                SpellRouteActionExecutor.ExecuteActions(CurrentStep.OnStepCompletedActions, ActionContext);
+
             CurrentStep = step;
             TimeCurrentStepEnteredAt = currentTime;
 
             SpellRouteActionExecutor.ExecuteActions(step.OnStepStartActions, ActionContext);
+
+            SpellRouteActionExecutor.ExecuteActions(step.OnStepCompletedActions, ActionContext);
         }
 
         public bool HasTimedOut(float currentTime)

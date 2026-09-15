@@ -15,65 +15,545 @@ MonoBehaviour:
   _ActivationRoutes:
   - _name: Basic Cast
     _firstStep:
-      _name: Trigger Press
+      _name: Trigger Pressed
+      _cooldown: 0
       _eventType: 0
       _button: 0
       _gesture:
-        _gestureType: 0
-        _direction: 0
+        _gestureType: 4
+        _direction: 4
         _velocitySpace: 0
         _overrideMinimumSpeed: 0
         _minimumSpeed: 0
-      _requiredCharge: 0
-      RequiredButtonsToBeHeld: 
+      _requiredCharge: 0.05
+      RequiredButtonsToBeHeld: 00000000
       _timeoutSeconds: 0
       _onStartedActions:
-      - name: SpawnProjectileAtOrigin
-        _type: 6
-        _runtimeObjectKey: projectile
-        _objectPrefab: {fileID: 2196924460264218457, guid: f5e52099def87a74db82186f683f5918,
+      - name: SpawnObjectAtCastOrigin
+        _type: 2
+        _runtimeObjectKey: preview
+        _objectPrefab: {fileID: 3999545585568816686, guid: c96f2b5598c7a3a4183c05daf1852742,
           type: 3}
+        _childOfSpawnpoint: 1
+        _spawnSize: 0.06
+        _spawnLayer: 0
+        _tweenSettings:
+          TweenKey: 
+          TargetObjectKey: 
+          Value: 0
+          Action: 0
+          SeperateAxis: 0
+          ChangeValue: 0
+          ChangeVector: {x: 0, y: 0, z: 0}
+          Duration: 0
+          Loop: 0
+          LoopType: 0
         _shootDirection: 0
         _projectileSpeed: 0
         _projectileLifetime: 0
+        _targetedProjectile: 0
+        _targetSettings:
+          EntityFilter: 0
+          Method: 0
+          Source: 0
+          Direction: 0
+          Selection: 0
+          IgnoredLayers:
+            serializedVersion: 2
+            m_Bits: 0
+          CastDistance: 0
+          CastSize: 0
+        _projectileModifiers: []
         _projectileCallbacks: []
+        _projectileCount: 0
+        _burstSpread: 0
         _audioClip: {fileID: 0}
         _volume: 0
+        _loopAudio: 0
+        _audioRuntimeKey: 
+        _loopAudioParentKey: 
+        _message: 
+      - name: TweenObject
+        _type: 7
+        _runtimeObjectKey: preview
+        _objectPrefab: {fileID: 3999545585568816686, guid: c96f2b5598c7a3a4183c05daf1852742,
+          type: 3}
+        _childOfSpawnpoint: 1
+        _spawnSize: 1
+        _spawnLayer: 0
+        _tweenSettings:
+          TweenKey: scalePreview
+          TargetObjectKey: preview
+          Value: 0
+          Action: 3
+          SeperateAxis: 0
+          ChangeValue: 0
+          ChangeVector: {x: 0, y: 0, z: 0}
+          Duration: 3
+          Loop: 0
+          LoopType: 0
+        _shootDirection: 0
+        _projectileSpeed: 0
+        _projectileLifetime: 0
+        _targetedProjectile: 0
+        _targetSettings:
+          EntityFilter: 0
+          Method: 0
+          Source: 0
+          Direction: 0
+          Selection: 0
+          IgnoredLayers:
+            serializedVersion: 2
+            m_Bits: 0
+          CastDistance: 0
+          CastSize: 0
+        _projectileModifiers: []
+        _projectileCallbacks: []
+        _projectileCount: 0
+        _burstSpread: 0
+        _audioClip: {fileID: 0}
+        _volume: 0
+        _loopAudio: 0
+        _audioRuntimeKey: 
+        _loopAudioParentKey: 
+        _message: 
       _onCompletionActions: []
       _finalStep: 0
       _nextSteps:
-      - _name: Trigger Release
-        _eventType: 1
+      - _name: Wand Flicked at no charge
+        _cooldown: 0.25
+        _eventType: 2
         _button: 0
         _gesture:
-          _gestureType: 0
-          _direction: 0
+          _gestureType: 4
+          _direction: 4
           _velocitySpace: 0
           _overrideMinimumSpeed: 0
           _minimumSpeed: 0
         _requiredCharge: 0
-        RequiredButtonsToBeHeld: 
+        RequiredButtonsToBeHeld: 00000000
         _timeoutSeconds: 0
-        _onStartedActions: []
-        _onCompletionActions:
-        - name: LaunchProjectile
-          _type: 7
-          _runtimeObjectKey: projectile
-          _objectPrefab: {fileID: 0}
-          _shootDirection: 2
-          _projectileSpeed: 5
-          _projectileLifetime: 3
-          _projectileCallbacks:
-          - rid: 2330997725644718153
+        _onStartedActions:
+        - name: SpawnObjectAtCastOrigin
+          _type: 2
+          _runtimeObjectKey: flash
+          _objectPrefab: {fileID: 7848842863859681960, guid: efd7dcac1f9cc4c45b208ad61b073cdb,
+            type: 3}
+          _childOfSpawnpoint: 0
+          _spawnSize: 0.2
+          _spawnLayer: 0
+          _tweenSettings:
+            TweenKey: 
+            TargetObjectKey: 
+            Value: 0
+            Action: 0
+            SeperateAxis: 0
+            ChangeValue: 0
+            ChangeVector: {x: 0, y: 0, z: 0}
+            Duration: 0
+            Loop: 0
+            LoopType: 0
+          _shootDirection: 0
+          _projectileSpeed: 0
+          _projectileLifetime: 0
+          _targetedProjectile: 0
+          _targetSettings:
+            EntityFilter: 0
+            Method: 0
+            Source: 0
+            Direction: 0
+            Selection: 0
+            IgnoredLayers:
+              serializedVersion: 2
+              m_Bits: 0
+            CastDistance: 0
+            CastSize: 0
+          _projectileModifiers: []
+          _projectileCallbacks: []
+          _projectileCount: 0
+          _burstSpread: 0
           _audioClip: {fileID: 0}
           _volume: 0
+          _loopAudio: 0
+          _audioRuntimeKey: 
+          _loopAudioParentKey: 
+          _message: 
+        _onCompletionActions:
+        - name: LaunchProjectileBurst
+          _type: 8
+          _runtimeObjectKey: projectile
+          _objectPrefab: {fileID: 1120250531953485468, guid: d73e5f2649dfd2940a7c14dd08edd912,
+            type: 3}
+          _childOfSpawnpoint: 0
+          _spawnSize: 1
+          _spawnLayer: 8
+          _tweenSettings:
+            TweenKey: 
+            TargetObjectKey: 
+            Value: 0
+            Action: 0
+            SeperateAxis: 0
+            ChangeValue: 0
+            ChangeVector: {x: 0, y: 0, z: 0}
+            Duration: 0
+            Loop: 0
+            LoopType: 0
+          _shootDirection: 7
+          _projectileSpeed: 10
+          _projectileLifetime: 3
+          _targetedProjectile: 1
+          _targetSettings:
+            EntityFilter: 2
+            Method: 1
+            Source: 2
+            Direction: 6
+            Selection: 0
+            IgnoredLayers:
+              serializedVersion: 2
+              m_Bits: 832
+            CastDistance: 15
+            CastSize: 3
+          _projectileModifiers:
+          - rid: 2330997922766520386
+          - rid: 2330997922766520385
+          - rid: 2330997922766520395
+          _projectileCallbacks:
+          - rid: 2330997922766520387
+          - rid: 2330997922766520397
+          _projectileCount: 1
+          _burstSpread: 0
+          _audioClip: {fileID: 0}
+          _volume: 0
+          _loopAudio: 0
+          _audioRuntimeKey: 
+          _loopAudioParentKey: 
+          _message: 
+        - name: DestroyObjects
+          _type: 3
+          _runtimeObjectKey: preview
+          _objectPrefab: {fileID: 0}
+          _childOfSpawnpoint: 0
+          _spawnSize: 0
+          _spawnLayer: 0
+          _tweenSettings:
+            TweenKey: 
+            TargetObjectKey: 
+            Value: 0
+            Action: 0
+            SeperateAxis: 0
+            ChangeValue: 0
+            ChangeVector: {x: 0, y: 0, z: 0}
+            Duration: 0
+            Loop: 0
+            LoopType: 0
+          _shootDirection: 7
+          _projectileSpeed: 10
+          _projectileLifetime: 3
+          _targetedProjectile: 0
+          _targetSettings:
+            EntityFilter: 2
+            Method: 1
+            Source: 2
+            Direction: 6
+            Selection: 0
+            IgnoredLayers:
+              serializedVersion: 2
+              m_Bits: 832
+            CastDistance: 15
+            CastSize: 3
+          _projectileModifiers:
+          - rid: 2330997922766520386
+          - rid: 2330997922766520385
+          _projectileCallbacks:
+          - rid: 2330997922766520387
+          _projectileCount: 0
+          _burstSpread: 0
+          _audioClip: {fileID: 0}
+          _volume: 0
+          _loopAudio: 0
+          _audioRuntimeKey: 
+          _loopAudioParentKey: 
+          _message: 
         _finalStep: 1
         _nextSteps: []
+      - _name: Wand reach charge stage 1
+        _cooldown: 0
+        _eventType: 3
+        _button: 0
+        _gesture:
+          _gestureType: 4
+          _direction: 4
+          _velocitySpace: 0
+          _overrideMinimumSpeed: 0
+          _minimumSpeed: 0
+        _requiredCharge: 3
+        RequiredButtonsToBeHeld: 00000000
+        _timeoutSeconds: 0
+        _onStartedActions:
+        - name: TweenObject
+          _type: 7
+          _runtimeObjectKey: 
+          _objectPrefab: {fileID: 0}
+          _childOfSpawnpoint: 0
+          _spawnSize: 0
+          _spawnLayer: 0
+          _tweenSettings:
+            TweenKey: punchPreview
+            TargetObjectKey: preview
+            Value: 0
+            Action: 4
+            SeperateAxis: 0
+            ChangeValue: 0.1
+            ChangeVector: {x: 0, y: 0, z: 0}
+            Duration: 1
+            Loop: 0
+            LoopType: 0
+          _shootDirection: 0
+          _projectileSpeed: 0
+          _projectileLifetime: 0
+          _targetedProjectile: 0
+          _targetSettings:
+            EntityFilter: 0
+            Method: 0
+            Source: 0
+            Direction: 0
+            Selection: 0
+            IgnoredLayers:
+              serializedVersion: 2
+              m_Bits: 0
+            CastDistance: 0
+            CastSize: 0
+          _projectileModifiers: []
+          _projectileCallbacks: []
+          _projectileCount: 0
+          _burstSpread: 0
+          _audioClip: {fileID: 0}
+          _volume: 0
+          _loopAudio: 0
+          _audioRuntimeKey: 
+          _loopAudioParentKey: 
+          _message: 
+        _onCompletionActions: []
+        _finalStep: 0
+        _nextSteps:
+        - _name: Wand flicked at charge 1
+          _cooldown: 0.4
+          _eventType: 2
+          _button: 0
+          _gesture:
+            _gestureType: 4
+            _direction: 4
+            _velocitySpace: 0
+            _overrideMinimumSpeed: 0
+            _minimumSpeed: 0
+          _requiredCharge: 0
+          RequiredButtonsToBeHeld: 00000000
+          _timeoutSeconds: 0
+          _onStartedActions:
+          - name: SpawnObjectAtCastOrigin
+            _type: 2
+            _runtimeObjectKey: 
+            _objectPrefab: {fileID: 7848842863859681960, guid: efd7dcac1f9cc4c45b208ad61b073cdb,
+              type: 3}
+            _childOfSpawnpoint: 0
+            _spawnSize: 0.3
+            _spawnLayer: 0
+            _tweenSettings:
+              TweenKey: 
+              TargetObjectKey: 
+              Value: 0
+              Action: 0
+              SeperateAxis: 0
+              ChangeValue: 0
+              ChangeVector: {x: 0, y: 0, z: 0}
+              Duration: 0
+              Loop: 0
+              LoopType: 0
+            _shootDirection: 0
+            _projectileSpeed: 0
+            _projectileLifetime: 0
+            _targetedProjectile: 0
+            _targetSettings:
+              EntityFilter: 0
+              Method: 0
+              Source: 0
+              Direction: 0
+              Selection: 0
+              IgnoredLayers:
+                serializedVersion: 2
+                m_Bits: 0
+              CastDistance: 0
+              CastSize: 0
+            _projectileModifiers: []
+            _projectileCallbacks: []
+            _projectileCount: 0
+            _burstSpread: 0
+            _audioClip: {fileID: 0}
+            _volume: 0
+            _loopAudio: 0
+            _audioRuntimeKey: 
+            _loopAudioParentKey: 
+            _message: 
+          _onCompletionActions:
+          - name: LaunchProjectileBurst
+            _type: 8
+            _runtimeObjectKey: projectile
+            _objectPrefab: {fileID: 1120250531953485468, guid: d73e5f2649dfd2940a7c14dd08edd912,
+              type: 3}
+            _childOfSpawnpoint: 0
+            _spawnSize: 1.5
+            _spawnLayer: 8
+            _tweenSettings:
+              TweenKey: 
+              TargetObjectKey: 
+              Value: 0
+              Action: 0
+              SeperateAxis: 0
+              ChangeValue: 0
+              ChangeVector: {x: 0, y: 0, z: 0}
+              Duration: 0
+              Loop: 0
+              LoopType: 0
+            _shootDirection: 7
+            _projectileSpeed: 10
+            _projectileLifetime: 3
+            _targetedProjectile: 1
+            _targetSettings:
+              EntityFilter: 2
+              Method: 1
+              Source: 2
+              Direction: 6
+              Selection: 0
+              IgnoredLayers:
+                serializedVersion: 2
+                m_Bits: 832
+              CastDistance: 15
+              CastSize: 3
+            _projectileModifiers:
+            - rid: 2330997922766520388
+            - rid: 2330997922766520389
+            - rid: 2330997922766520396
+            _projectileCallbacks:
+            - rid: 2330997922766520390
+            - rid: 2330997922766520398
+            _projectileCount: 3
+            _burstSpread: 0.2
+            _audioClip: {fileID: 0}
+            _volume: 0
+            _loopAudio: 0
+            _audioRuntimeKey: 
+            _loopAudioParentKey: 
+            _message: 
+          - name: DestroyObjects
+            _type: 3
+            _runtimeObjectKey: preview
+            _objectPrefab: {fileID: 0}
+            _childOfSpawnpoint: 0
+            _spawnSize: 0
+            _spawnLayer: 0
+            _tweenSettings:
+              TweenKey: 
+              TargetObjectKey: 
+              Value: 0
+              Action: 0
+              SeperateAxis: 0
+              ChangeValue: 0
+              ChangeVector: {x: 0, y: 0, z: 0}
+              Duration: 0
+              Loop: 0
+              LoopType: 0
+            _shootDirection: 7
+            _projectileSpeed: 10
+            _projectileLifetime: 3
+            _targetedProjectile: 0
+            _targetSettings:
+              EntityFilter: 2
+              Method: 1
+              Source: 2
+              Direction: 6
+              Selection: 0
+              IgnoredLayers:
+                serializedVersion: 2
+                m_Bits: 832
+              CastDistance: 15
+              CastSize: 3
+            _projectileModifiers:
+            - rid: 2330997922766520388
+            - rid: 2330997922766520389
+            _projectileCallbacks:
+            - rid: 2330997922766520390
+            _projectileCount: 0
+            _burstSpread: 0
+            _audioClip: {fileID: 0}
+            _volume: 0
+            _loopAudio: 0
+            _audioRuntimeKey: 
+            _loopAudioParentKey: 
+            _message: 
+          _finalStep: 1
+          _nextSteps: []
   references:
     version: 2
     RefIds:
-    - rid: 2330997725644718153
-      type: {class: SpellProjectile_DebugInfo, ns: AgeOfEnlightenment.Spellcasting,
+    - rid: 2330997922766520385
+      type: {class: HomingProjectileModifier, ns: AgeOfEnlightenment.Spellcasting,
         asm: Assembly-CSharp}
       data:
-        _callbackType: 2
+        HomingStrength: 60
+    - rid: 2330997922766520386
+      type: {class: LookTowardsLaunchModifier, ns: AgeOfEnlightenment.Spellcasting,
+        asm: Assembly-CSharp}
+      data: 
+    - rid: 2330997922766520387
+      type: {class: SpellProjectile_DealDamage, ns: AgeOfEnlightenment.Spellcasting,
+        asm: Assembly-CSharp}
+      data:
+        _callbackType: 0
+        Damage: 6
+    - rid: 2330997922766520388
+      type: {class: LookTowardsLaunchModifier, ns: AgeOfEnlightenment.Spellcasting,
+        asm: Assembly-CSharp}
+      data: 
+    - rid: 2330997922766520389
+      type: {class: HomingProjectileModifier, ns: AgeOfEnlightenment.Spellcasting,
+        asm: Assembly-CSharp}
+      data:
+        HomingStrength: 60
+    - rid: 2330997922766520390
+      type: {class: SpellProjectile_DealDamage, ns: AgeOfEnlightenment.Spellcasting,
+        asm: Assembly-CSharp}
+      data:
+        _callbackType: 0
+        Damage: 12
+    - rid: 2330997922766520395
+      type: {class: PlayAudioOnSpawn, ns: AgeOfEnlightenment.Spellcasting, asm: Assembly-CSharp}
+      data:
+        clip: {fileID: 8300000, guid: 94682fbc97a777e4c968b9b26e54606c, type: 3}
+        volume: 0.04
+        volumeModifier: 0.01
+        pitchModifier: 0.1
+    - rid: 2330997922766520396
+      type: {class: PlayAudioOnSpawn, ns: AgeOfEnlightenment.Spellcasting, asm: Assembly-CSharp}
+      data:
+        clip: {fileID: 8300000, guid: 94682fbc97a777e4c968b9b26e54606c, type: 3}
+        volume: 0.05
+        volumeModifier: 0.02
+        pitchModifier: 0.1
+    - rid: 2330997922766520397
+      type: {class: SpellProjectile_SpawnObject, ns: AgeOfEnlightenment.Spellcasting,
+        asm: Assembly-CSharp}
+      data:
+        _callbackType: 0
+        Prefab: {fileID: 4785461423297262411, guid: 6c16cf2434ee9174ab0ff2f0f93246d7,
+          type: 3}
+        Size: 0.3
+        AlignToNormal: 1
+    - rid: 2330997922766520398
+      type: {class: SpellProjectile_SpawnObject, ns: AgeOfEnlightenment.Spellcasting,
+        asm: Assembly-CSharp}
+      data:
+        _callbackType: 0
+        Prefab: {fileID: 4785461423297262411, guid: 6c16cf2434ee9174ab0ff2f0f93246d7,
+          type: 3}
+        Size: 0.2
+        AlignToNormal: 1

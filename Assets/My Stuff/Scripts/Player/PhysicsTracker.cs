@@ -135,13 +135,16 @@ namespace FoxheadDev.GestureDetection
         /// </summary>
         public Vector3 Direction { get; private set; }
         public Vector3 Velocity { get; private set; }
+        public Vector3 NonSmoothed_Velocity { get; private set; }
         //This is a read-only value for how the hand is moving in reference to itself
         //This is what most things will be checked against, since we want to know what direction the hand is moving
         //This is a better replacement for the DotProdX Y and Z from the previous versions.
         public Vector3 SelfSpaceVelocity => TrackedTransform.InverseTransformVector(Velocity);
+        public Vector3 NonSmoothed_SelfSpaceVelocity => TrackedTransform.InverseTransformVector(NonSmoothed_Velocity);
         //This is how the hand is moving in reference to the head. This can give us a sense of left and right depending on which direction the player is looking
         //This does fail if you try to perform the actions on a different side than in front of you, but that kinda makes sense tbh
         public Vector3 ViewSpaceVelocity => Camera.main.transform.InverseTransformVector(Velocity);
+        public Vector3 NonSmoothed_ViewSpaceVelocity => Camera.main.transform.InverseTransformVector(NonSmoothed_Velocity);
 
         //How is the Velocity of the hand changing over time.
         public Vector3 Acceleration { get; private set; }
@@ -318,6 +321,9 @@ namespace FoxheadDev.GestureDetection
 
                 Direction = Vector3.Lerp(activeDirection, Direction, directionVsActive).normalized;
             }
+
+
+            NonSmoothed_Velocity = currentOffset / timeSlice;
 
             Velocity = Direction * Speed;
 

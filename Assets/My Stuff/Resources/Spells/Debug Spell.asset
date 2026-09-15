@@ -1,0 +1,116 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca11283d297e3674f8aa02f811dd1754, type: 3}
+  m_Name: Debug Spell
+  m_EditorClassIdentifier: 
+  _ActivationRoutes:
+  - _name: Burst Fire
+    _firstStep:
+      _name: Burst Testing
+      _cooldown: 0
+      _eventType: 0
+      _button: 0
+      _gesture:
+        _gestureType: 0
+        _direction: 0
+        _velocitySpace: 0
+        _overrideMinimumSpeed: 0
+        _minimumSpeed: 0
+      _requiredCharge: 0
+      RequiredButtonsToBeHeld: 
+      _timeoutSeconds: 0
+      _onStartedActions: []
+      _onCompletionActions:
+      - name: LaunchProjectileBurst
+        _type: 8
+        _runtimeObjectKey: 
+        _objectPrefab: {fileID: 1120250531953485468, guid: d73e5f2649dfd2940a7c14dd08edd912,
+          type: 3}
+        _childOfSpawnpoint: 0
+        _spawnSize: 1
+        _spawnLayer: 8
+        _tweenSettings:
+          TweenKey: 
+          TargetObjectKey: 
+          Value: 0
+          Action: 0
+          SeperateAxis: 0
+          ChangeValue: 0
+          ChangeVector: {x: 0, y: 0, z: 0}
+          Duration: 0
+          Loop: 0
+          LoopType: 0
+        _shootDirection: 2
+        _projectileSpeed: 8
+        _projectileLifetime: 4
+        _targetedProjectile: 1
+        _targetSettings:
+          EntityFilter: 2
+          Method: 1
+          Source: 2
+          Direction: 6
+          Selection: 0
+          IgnoredLayers:
+            serializedVersion: 2
+            m_Bits: 832
+          CastDistance: 15
+          CastSize: 3
+        _projectileModifiers:
+        - rid: 2330997922766520392
+        - rid: 2330997922766520394
+        _projectileCallbacks:
+        - rid: 2330997922766520393
+        _projectileCount: 3
+        _burstSpread: 0.3
+        _audioClip: {fileID: 0}
+        _volume: 0
+        _loopAudio: 0
+        _audioRuntimeKey: 
+        _loopAudioParentKey: 
+        _message: 
+      _finalStep: 1
+      _nextSteps:
+      - _name: 
+        _cooldown: 0
+        _eventType: 0
+        _button: 1
+        _gesture:
+          _gestureType: 0
+          _direction: 0
+          _velocitySpace: 0
+          _overrideMinimumSpeed: 0
+          _minimumSpeed: 0
+        _requiredCharge: 0
+        RequiredButtonsToBeHeld: 00000000
+        _timeoutSeconds: 0
+        _onStartedActions: []
+        _onCompletionActions: []
+        _finalStep: 1
+        _nextSteps: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 2330997922766520392
+      type: {class: LookTowardsLaunchModifier, ns: AgeOfEnlightenment.Spellcasting,
+        asm: Assembly-CSharp}
+      data: 
+    - rid: 2330997922766520393
+      type: {class: SpellProjectile_DealDamage, ns: AgeOfEnlightenment.Spellcasting,
+        asm: Assembly-CSharp}
+      data:
+        _callbackType: 0
+        Damage: 3
+    - rid: 2330997922766520394
+      type: {class: HomingProjectileModifier, ns: AgeOfEnlightenment.Spellcasting,
+        asm: Assembly-CSharp}
+      data:
+        HomingStrength: 60

@@ -80,8 +80,24 @@ namespace AgeOfEnlightenment.Spellcasting
                     break;
 				case GestureType.Flick:
                     return PremadeGestureLibrary.SelfSpaceFlick(tracker, gesture.Direction, speedOverride);
-                    
-			}
+                case GestureType.Orientless:
+                    switch (gesture.VelocitySpace)
+                    {
+                        case GestureVelocitySpace.View:
+                            return PremadeGestureLibrary.ViewSpaceMotion(tracker, gesture.Direction, speedOverride);
+                            
+                        case GestureVelocitySpace.Reverse_View:
+                            break;
+                        case GestureVelocitySpace.Global:
+                            break;
+                        case GestureVelocitySpace.Reverse_Global:
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+
+            }
 
             throw new ArgumentOutOfRangeException(nameof(gesture.Type));
 		}
